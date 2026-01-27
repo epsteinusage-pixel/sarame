@@ -840,7 +840,203 @@ layout.Padding = UDim.new(0, 8)
     end
 
     toggle_btn.MouseButton1Click:Connect(toggle_gui)
-
+    
+    function library:add_settings(tab)
+        local settings_data = {
+            gui_keybind = Enum.KeyCode.RightShift,
+            accent_color = Color3.fromRGB(106, 152, 242),
+            configs = {},
+            autoload_config = nil
+        }
+    
+        local config_folder = "anarchy_configs"
+        if not isfolder(config_folder) then
+            makefolder(config_folder)
+        end
+    
+        local function save_config(config_name)
+            local config_path = config_folder .. "/" .. config_name .. ".json"
+            local config_data = {
+                settings = settings_data,
+                timestamp = os.time()
+            }
+            writefile(config_path, game:GetService("HttpService"):JSONEncode(config_data))
+        end
+    
+        local function load_config(config_name)
+            local config_path = config_folder .. "/" .. config_name .. ".json"
+            if isfile(config_path) then
+                local config_data = game:GetService("HttpService"):JSONDecode(readfile(config_path))
+                settings_data = config_data.settings
+                return true
+            end
+            return false
+        end
+    
+        local function delete_config(config_name)
+            local config_path = config_folder .. "/" .. config_name .. ".json"
+            if isfile(config_path) then
+                delfile(config_path)
+                return true
+            end
+            return false
+        end
+    
+        local function get_configs()
+            local configs = {}
+            if isfolder(config_folder) then
+                for _, file in pairs(listfiles(config_folder)) do
+                    local name = file:match("([^/]+)%.json$")
+                    if name then
+                        table.insert(configs, name)
+                    end
+                end
+            end
+            return configs
+        end
+    
+        tab:add_toggle("GUI Keybind", true, function(enabled)
+            print("GUI Keybind enabled:", enabled)
+        end)
+    
+        tab:add_color_picker("Accent Color", settings_data.accent_color, function(color, transparency)
+            settings_data.accent_color = color
+        end)
+    
+        local config_name_box = Instance.new("Frame")
+        config_name_box.Name = "config_name_input"
+        config_name_box.Size = UDim2.new(1, -15, 0, 38)
+        config_name_box.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        config_name_box.BorderSizePixel = 0
+        config_name_box.Parent = tab.page
+    
+        Instance.new("UICorner", config_name_box).CornerRadius = UDim.new(0, 6)
+        local box_stroke = Instance.new("UIStroke", config_name_box)
+        box_stroke.Thickness = 0.5
+        box_stroke.Color = Color3.fromRGB(120, 120, 120)
+    
+        local config_label = Instance.new("TextLabel")
+        config_label.Size = UDim2.new(0, 100, 1, 0)
+        config_label.Position = UDim2.new(0, 12, 0, 0)
+        config_label.BackgroundTransparency = 1
+        config_label.Text = "Config Name"
+        config_label.TextColor3 = Color3.fromRGB(220, 220, 220)
+        config_label.TextSize = 14
+        config_label.Font = Enum.Font.Roboto
+        config_label.TextXAlignment = Enum.TextXAlignment.Left
+        config_label.Parent = config_name_box
+    
+        local label_stroke = Instance.new("UIStroke", config_label)
+        label_stroke.Thickness = 1.5
+        label_stroke.Color = Color3.fromRGB(0, 0, 0)
+    
+        local text_box = Instance.new("TextBox")
+        text_box.Size = UDim2.new(1, -120, 0, 24)
+        text_box.Position = UDim2.new(0, 110, 0, 7)
+        text_box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        text_box.Text = ""
+        text_box.PlaceholderText = "Enter config name..."
+        text_box.TextColor3 = Color3.fromRGB(200, 200, 200)
+        text_box.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+        text_box.TextSize = 13
+        text_box.Font = Enum.Font.Roboto
+        text_box.ClearTextOnFocus = false
+        text_box.Parent = config_name_box
+    
+        Instance.new("UICorner", text_box).CornerRadius = UDim.new(0, 4)
+        local textbox_stroke = Instance.new("UIStroke", text_box)
+        textbox_stroke.Thickness = 1
+        textbox_stroke.Color = Color3.fromRGB(0, 0, 0)
+    
+        local function create_config_button(text, position_offset, callback)
+            local button_frame = Instance.new("Frame")
+            button_frame.Size = UDim2.new(0.48, 0, 0, 32)
+            button_frame.Position = UDim2.new(position_offset, 0, 0, 0)
+            button_frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            button_frame.BorderSizePixel = 0
+            button_frame.Parent = tab.page
+    
+            Instance.new("UICorner", button_frame).CornerRadius = UDim.new(0, 6)
+            local btn_stroke = Instance.new("UIStroke", button_frame)
+            btn_stroke.Thickness = 0.5
+            btn_stroke.Color = Color3.fromRGB(120, 120, 120)
+    
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(1, 0, 1, 0)
+            button.BackgroundTransparency = 1
+            button.Text = text
+            button.TextColor3 = Color3.fromRGB(220, 220, 220)
+            button.TextSize = 14
+            button.Font = Enum.Font.Roboto
+            button.Parent = button_frame
+    
+            local btn_text_stroke = Instance.new("UIStroke", button)
+            btn_text_stroke.Thickness = 1.5
+            btn_text_stroke.Color = Color3.fromRGB(0, 0, 0)
+    
+            button.MouseButton1Click:Connect(function()
+                tween_service:Create(button, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
+                task.wait(0.1)
+                tween_service:Create(button, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
+                callback()
+            end)
+    
+            return button_frame
+        end
+    
+        local buttons_container = Instance.new("Frame")
+        buttons_container.Size = UDim2.new(1, -15, 0, 68)
+        buttons_container.BackgroundTransparency = 1
+        buttons_container.Parent = tab.page
+    
+        local row1 = Instance.new("Frame")
+        row1.Size = UDim2.new(1, 0, 0, 32)
+        row1.Position = UDim2.new(0, 0, 0, 0)
+        row1.BackgroundTransparency = 1
+        row1.Parent = buttons_container
+    
+        local row2 = Instance.new("Frame")
+        row2.Size = UDim2.new(1, 0, 0, 32)
+        row2.Position = UDim2.new(0, 0, 0, 36)
+        row2.BackgroundTransparency = 1
+        row2.Parent = buttons_container
+    
+        create_config_button("Save Config", 0, function()
+            local name = text_box.Text
+            if name ~= "" then
+                save_config(name)
+                print("Config saved:", name)
+            end
+        end).Parent = row1
+    
+        create_config_button("Load Config", 0.52, function()
+            local name = text_box.Text
+            if name ~= "" and load_config(name) then
+                print("Config loaded:", name)
+            end
+        end).Parent = row1
+    
+        create_config_button("Delete Config", 0, function()
+            local name = text_box.Text
+            if name ~= "" and delete_config(name) then
+                print("Config deleted:", name)
+                text_box.Text = ""
+            end
+        end).Parent = row2
+    
+        create_config_button("Set Autoload", 0.52, function()
+            local name = text_box.Text
+            if name ~= "" then
+                settings_data.autoload_config = name
+                print("Autoload config set:", name)
+            end
+        end).Parent = row2
+    
+        tab:add_dropdown("Select Config", get_configs(), false, function(selected)
+            text_box.Text = selected
+            print("Selected config:", selected)
+        end)
+    end
     local function make_draggable(obj, target)
         target = target or obj
         local dragging, drag_start, start_pos
