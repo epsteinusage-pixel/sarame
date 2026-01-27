@@ -63,6 +63,18 @@ function library:create()
     
     local toggle_outer, toggle_inner = create_sandwich("toggle", UDim2.new(0, 100, 0, 50), UDim2.new(0.1, 0, 0.5, -25), screen_gui)
     toggle_inner.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+
+    local main_outer, main_inner = create_sandwich("main", UDim2.new(0, 600, 0, 400), UDim2.new(0.5, 0, 0.5, 0), screen_gui)
+    main_outer.AnchorPoint = Vector2.new(0.5, 0.5)
+    main_inner.ClipsDescendants = true
+    
+    local ui_gradient = Instance.new("UIGradient")
+    ui_gradient.Rotation = 90
+    ui_gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 45)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 35, 35))
+    })
+    ui_gradient.Parent = main_inner
     
     local toggle_btn = Instance.new("TextButton")
     toggle_btn.Size = UDim2.new(1, 0, 1, 0)
