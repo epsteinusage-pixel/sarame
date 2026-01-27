@@ -8,7 +8,7 @@ function library:create()
     local screen_gui = Instance.new("ScreenGui")
     screen_gui.Name = "anarchy_gui"
     screen_gui.ResetOnSpawn = false
-    screen_gui.Parent = players.LocalPlayer:WaitForChild("PlayerGui")
+    screen_gui.Parent = game:GetService("CoreGui")
 
     local function create_sandwich(name, size, pos, parent)
         local black_ext_frame = Instance.new("Frame")
@@ -17,71 +17,57 @@ function library:create()
         black_ext_frame.Position = pos
         black_ext_frame.BackgroundTransparency = 1
         black_ext_frame.Parent = parent
-
+    
         local black_ext_stroke = Instance.new("UIStroke")
         black_ext_stroke.Thickness = 2.5
         black_ext_stroke.Color = Color3.fromRGB(0, 0, 0)
         black_ext_stroke.Parent = black_ext_frame
-
+    
         local corner_ext = Instance.new("UICorner")
         corner_ext.CornerRadius = UDim.new(0, 6)
         corner_ext.Parent = black_ext_frame
-
+    
         local accent_frame = Instance.new("Frame")
         accent_frame.Name = name .. "_accent"
         accent_frame.Size = UDim2.new(1, 0, 1, 0)
         accent_frame.BackgroundTransparency = 1
         accent_frame.Parent = black_ext_frame
-
+    
         local accent_stroke = Instance.new("UIStroke")
         accent_stroke.Thickness = 2
         accent_stroke.Color = Color3.fromRGB(106, 152, 242)
         accent_stroke.Parent = accent_frame
-
+    
         local corner_acc = Instance.new("UICorner")
         corner_acc.CornerRadius = UDim.new(0, 6)
         corner_acc.Parent = accent_frame
-
+    
         local main_content = Instance.new("Frame")
         main_content.Name = name .. "_main"
         main_content.Size = UDim2.new(1, 0, 1, 0)
         main_content.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         main_content.BorderSizePixel = 0
         main_content.Parent = accent_frame
-
+    
         local black_int_stroke = Instance.new("UIStroke")
         black_int_stroke.Thickness = 1
         black_int_stroke.Color = Color3.fromRGB(0, 0, 0)
         black_int_stroke.Parent = main_content
-
+    
         local corner_main = Instance.new("UICorner")
         corner_main.CornerRadius = UDim.new(0, 6)
         corner_main.Parent = main_content
-
+    
         return black_ext_frame, main_content
     end
-
+    
     local toggle_outer, toggle_inner = create_sandwich("toggle", UDim2.new(0, 100, 0, 50), UDim2.new(0.1, 0, 0.5, -25), screen_gui)
     toggle_inner.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-
-    local toggle_btn = Instance.new("TextButton")
-    toggle_btn.Size = UDim2.new(1, 0, 1, 0)
-    toggle_btn.BackgroundTransparency = 1
-    toggle_btn.RichText = true
-    toggle_btn.Text = 'Anarchy'
-    toggle_btn.TextSize = 22
-    toggle_btn.Font = Enum.Font.Roboto
-    toggle_btn.Parent = toggle_inner
-
-    local btn_stroke = Instance.new("UIStroke")
-    btn_stroke.Thickness = 1.5
-    btn_stroke.Color = Color3.fromRGB(0, 0, 0)
-    btn_stroke.Parent = toggle_btn
 
     local main_outer, main_inner = create_sandwich("main", UDim2.new(0, 600, 0, 400), UDim2.new(0.5, 0, 0.5, 0), screen_gui)
     main_outer.AnchorPoint = Vector2.new(0.5, 0.5)
     main_inner.ClipsDescendants = true
-
+    
     local ui_gradient = Instance.new("UIGradient")
     ui_gradient.Rotation = 90
     ui_gradient.Color = ColorSequence.new({
@@ -89,7 +75,22 @@ function library:create()
         ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 35, 35))
     })
     ui_gradient.Parent = main_inner
-
+    
+    local toggle_btn = Instance.new("TextButton")
+    toggle_btn.Size = UDim2.new(1, 0, 1, 0)
+    toggle_btn.BackgroundTransparency = 1
+    toggle_btn.RichText = true
+    toggle_btn.Text = 'Anarchy'
+    toggle_btn.TextSize = 22
+    toggle_btn.Font = Enum.Font.Roboto
+    toggle_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
+    toggle_btn.Parent = toggle_inner
+    
+    local btn_stroke = Instance.new("UIStroke")
+    btn_stroke.Thickness = 1.5
+    btn_stroke.Color = Color3.fromRGB(0, 0, 0)
+    btn_stroke.Parent = toggle_btn
+    
     local anarchy_label = Instance.new("TextLabel")
     local text_stroke = Instance.new("UIStroke")
     anarchy_label.Parent = main_inner
@@ -100,6 +101,7 @@ function library:create()
     anarchy_label.Text = 'Anarchy Hub'
     anarchy_label.TextSize = 20
     anarchy_label.Font = Enum.Font.Roboto
+    anarchy_label.TextColor3 = Color3.fromRGB(106, 152, 242)
     anarchy_label.TextXAlignment = Enum.TextXAlignment.Left
     text_stroke.Thickness = 1.5
     text_stroke.Color = Color3.fromRGB(0, 0, 0)
@@ -830,14 +832,6 @@ layout.Padding = UDim.new(0, 8)
     end
 
     local gui_visible = true
-
-    local function toggle_gui()
-        gui_visible = not gui_visible
-        local target_size = gui_visible and UDim2.new(0, 600, 0, 400) or UDim2.new(0, 0, 0, 0)
-        tween_service:Create(main_outer, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = target_size}):Play()
-    end
-
-    toggle_btn.MouseButton1Click:Connect(toggle_gui)
 
     local function make_draggable(obj, target)
         target = target or obj
