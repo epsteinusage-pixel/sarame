@@ -85,6 +85,11 @@ function library:create()
     toggle_btn.Font = Enum.Font.Roboto
     toggle_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
     toggle_btn.Parent = toggle_inner
+
+    toggle_btn.MouseButton1Click:Connect(function()
+        gui_visible = not gui_visible
+        main_outer.Visible = gui_visible
+    end)
     
     local btn_stroke = Instance.new("UIStroke")
     btn_stroke.Thickness = 1.5
