@@ -378,7 +378,7 @@ function library:create()
             end)
         end
 
-        function add_slider(name, min, max, default, callback)
+        function tab:add_slider(name, min, max, default, callback)
             local layout = page:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", page)
             layout.Padding = UDim.new(0, 8)
             layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -506,7 +506,7 @@ function library:create()
             end)
         end
 
-        function add_dropdown(name, options, is_multi, callback)
+        function tab:add_dropdown(name, options, is_multi, callback)
             local dropdown_container = Instance.new("Frame")
             dropdown_container.Name = name .. "_Dropdown"
             dropdown_container.Size = UDim2.new(1, -15, 0, 38)
@@ -632,7 +632,7 @@ function library:create()
             dropdown_container.Parent = page
         end
 
-        function add_color_picker(name, default_color, callback)
+        function tab:add_color_picker(name, default_color, callback)
             local picker_container = Instance.new("Frame")
             picker_container.Name = name .. "_color_picker"
             picker_container.Size = UDim2.new(1, -15, 0, 38)
@@ -844,7 +844,7 @@ function library:create()
         end
 
      
-        function add_button(name, callback)
+        function tab:add_button(name, callback)
             local layout = page:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", page)
             layout.Padding = UDim.new(0, 8)
             layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -978,7 +978,7 @@ function library:create()
             end)
 
             text_box.FocusLost:Connect(function(enter_pressed)
-                tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(60, 60, 60)}):Play()
+                tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(0, 0, 0)}):Play()
                 tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
                 
                 if enter_pressed then
