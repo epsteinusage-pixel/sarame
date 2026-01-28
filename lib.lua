@@ -88,7 +88,18 @@ function library:create()
 
     toggle_btn.MouseButton1Click:Connect(function()
         gui_visible = not gui_visible
-        main_outer.Visible = gui_visible
+        if gui_visible then
+            main_outer.Visible = true
+            tween_service:Create(main_outer, TweenInfo.new(0.3, Enum.EasingStyle.Quart), 
+                {Size = UDim2.new(0, 600, 0, 400)}):Play()
+        else
+            local hide_tween = tween_service:Create(main_outer, TweenInfo.new(0.3, Enum.EasingStyle.Quart), 
+                {Size = UDim2.new(0, 0, 0, 0)})
+            hide_tween:Play()
+            hide_tween.Completed:Connect(function()
+                main_outer.Visible = false
+            end)
+        end
     end)
     
     local btn_stroke = Instance.new("UIStroke")
