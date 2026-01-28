@@ -1096,7 +1096,7 @@ function library:create()
         title.Text = "Config System"
         title.TextColor3 = Color3.fromRGB(106, 152, 242)
         title.TextSize = 16
-        title.Font = Enum.Font.RobotoBold
+        title.Font = Enum.Font.Roboto
         title.TextXAlignment = Enum.TextXAlignment.Left
         title.Parent = config_container
     
