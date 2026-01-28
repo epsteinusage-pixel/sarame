@@ -236,7 +236,7 @@ function library:create()
 
         function tab:add_toggle(name, has_bind, callback)
             local layout = page:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", page)
-layout.Padding = UDim.new(0, 8)
+            layout.Padding = UDim.new(0, 8)
             layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
             layout.VerticalAlignment = Enum.VerticalAlignment.Top
 
@@ -840,6 +840,154 @@ layout.Padding = UDim.new(0, 8)
                 local is_expanded = picker_container.Size.Y.Offset > 50
                 local target_y = is_expanded and 38 or 150
                 tween_service:Create(picker_container, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(1, -15, 0, target_y)}):Play()
+            end)
+        end
+
+     
+        function tab:add_button(name, callback)
+            local layout = page:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", page)
+            layout.Padding = UDim.new(0, 8)
+            layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+            layout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+            local container_padding = page:FindFirstChild("UIPadding") or Instance.new("UIPadding", page)
+            container_padding.PaddingTop = UDim.new(0, 15)
+
+            local button_container = Instance.new("Frame")
+            button_container.Name = name .. "_Button"
+            button_container.Size = UDim2.new(1, -15, 0, 38)
+            button_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            button_container.BorderSizePixel = 0
+            button_container.Parent = page
+
+            local container_corner = Instance.new("UICorner")
+            container_corner.CornerRadius = UDim.new(0, 6)
+            container_corner.Parent = button_container
+
+            local container_stroke = Instance.new("UIStroke")
+            container_stroke.Thickness = 0.5
+            container_stroke.Color = Color3.fromRGB(120, 120, 120)
+            container_stroke.Parent = button_container
+
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(1, 0, 1, 0)
+            button.BackgroundTransparency = 1
+            button.Text = name
+            button.TextColor3 = Color3.fromRGB(220, 220, 220)
+            button.TextSize = 14
+            button.Font = Enum.Font.Roboto
+            button.Parent = button_container
+
+            local button_stroke = Instance.new("UIStroke")
+            button_stroke.Thickness = 1.5
+            button_stroke.Color = Color3.fromRGB(0, 0, 0)
+            button_stroke.Parent = button
+
+            button.MouseButton1Click:Connect(function()
+                tween_service:Create(button, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
+                tween_service:Create(container_stroke, TweenInfo.new(0.1), {Color = Color3.fromRGB(106, 152, 242)}):Play()
+                
+                callback()
+                
+                task.wait(0.1)
+                tween_service:Create(button, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
+                tween_service:Create(container_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(120, 120, 120)}):Play()
+            end)
+
+            button.MouseEnter:Connect(function()
+                tween_service:Create(button_container, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}):Play()
+            end)
+
+            button.MouseLeave:Connect(function()
+                tween_service:Create(button_container, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
+            end)
+        end
+
+        function tab:add_input_text_field(name, placeholder, callback)
+            local layout = page:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", page)
+            layout.Padding = UDim.new(0, 8)
+            layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+            layout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+            local container_padding = page:FindFirstChild("UIPadding") or Instance.new("UIPadding", page)
+            container_padding.PaddingTop = UDim.new(0, 15)
+
+            local input_container = Instance.new("Frame")
+            input_container.Name = name .. "_Input"
+            input_container.Size = UDim2.new(1, -15, 0, 60)
+            input_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            input_container.BorderSizePixel = 0
+            input_container.Parent = page
+
+            local container_corner = Instance.new("UICorner")
+            container_corner.CornerRadius = UDim.new(0, 6)
+            container_corner.Parent = input_container
+
+            local container_stroke = Instance.new("UIStroke")
+            container_stroke.Thickness = 0.5
+            container_stroke.Color = Color3.fromRGB(120, 120, 120)
+            container_stroke.Parent = input_container
+
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, -24, 0, 20)
+            label.Position = UDim2.new(0, 12, 0, 5)
+            label.BackgroundTransparency = 1
+            label.Text = name
+            label.TextColor3 = Color3.fromRGB(220, 220, 220)
+            label.TextSize = 14
+            label.Font = Enum.Font.Roboto
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.Parent = input_container
+
+            local label_stroke = Instance.new("UIStroke")
+            label_stroke.Thickness = 1.5
+            label_stroke.Color = Color3.fromRGB(0, 0, 0)
+            label_stroke.Parent = label
+
+            local text_box = Instance.new("TextBox")
+            text_box.Size = UDim2.new(1, -24, 0, 26)
+            text_box.Position = UDim2.new(0, 12, 0, 28)
+            text_box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            text_box.Text = ""
+            text_box.PlaceholderText = placeholder or "Enter text..."
+            text_box.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+            text_box.TextColor3 = Color3.fromRGB(200, 200, 200)
+            text_box.TextSize = 13
+            text_box.Font = Enum.Font.Roboto
+            text_box.TextXAlignment = Enum.TextXAlignment.Left
+            text_box.ClearTextOnFocus = false
+            text_box.Parent = input_container
+
+            local textbox_corner = Instance.new("UICorner")
+            textbox_corner.CornerRadius = UDim.new(0, 4)
+            textbox_corner.Parent = text_box
+
+            local textbox_stroke = Instance.new("UIStroke")
+            textbox_stroke.Thickness = 1
+            textbox_stroke.Color = Color3.fromRGB(60, 60, 60)
+            textbox_stroke.Parent = text_box
+
+            local textbox_padding = Instance.new("UIPadding")
+            textbox_padding.PaddingLeft = UDim.new(0, 8)
+            textbox_padding.PaddingRight = UDim.new(0, 8)
+            textbox_padding.Parent = text_box
+
+            text_box.Focused:Connect(function()
+                tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(106, 152, 242)}):Play()
+                tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
+            end)
+
+            text_box.FocusLost:Connect(function(enter_pressed)
+                tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(60, 60, 60)}):Play()
+                tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
+                
+                if enter_pressed then
+                    callback(text_box.Text)
+                end
+            end)
+
+            text_box:GetPropertyChangedSignal("Text"):Connect(function()
+                callback(text_box.Text)
             end)
         end
 
