@@ -249,6 +249,7 @@ function library:create()
             toggle_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
             toggle_container.BorderSizePixel = 0
             toggle_container.Parent = page
+            toggle_container.LayoutOrder = #page:GetChildren() 
 
             local container_corner = Instance.new("UICorner")
             container_corner.CornerRadius = UDim.new(0, 6)
@@ -393,6 +394,7 @@ function library:create()
             slider_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
             slider_container.BorderSizePixel = 0
             slider_container.Parent = page
+            slider_container.LayoutOrder = #page:GetChildren() -
 
             local container_corner = Instance.new("UICorner")
             container_corner.CornerRadius = UDim.new(0, 6)
