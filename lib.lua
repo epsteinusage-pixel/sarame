@@ -991,7 +991,6 @@ function library:create()
             end)
         end
 
-
         table.insert(window.tabs, tab)
         return tab
     end
