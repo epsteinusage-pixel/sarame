@@ -973,7 +973,7 @@ function library:create()
             textbox_padding.Parent = text_box
 
             text_box.Focused:Connect(function()
-                tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(106, 152, 242)}):Play()
+                tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(0, 0, 0)}):Play()
                 tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
             end)
 
