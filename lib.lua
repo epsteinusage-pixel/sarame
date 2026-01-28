@@ -964,7 +964,7 @@ function library:create()
 
             local textbox_stroke = Instance.new("UIStroke")
             textbox_stroke.Thickness = 1
-            textbox_stroke.Color = Color3.fromRGB(60, 60, 60)
+            textbox_stroke.Color = Color3.fromRGB(0, 0, 0)
             textbox_stroke.Parent = text_box
 
             local textbox_padding = Instance.new("UIPadding")
