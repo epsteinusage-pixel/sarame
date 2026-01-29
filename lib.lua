@@ -249,7 +249,7 @@ function library:create()
             toggle_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
             toggle_container.BorderSizePixel = 0
             toggle_container.Parent = page
-
+            toggle_container.LayoutOrder = #page:GetChildren() 
 
             local container_corner = Instance.new("UICorner")
             container_corner.CornerRadius = UDim.new(0, 6)
@@ -394,7 +394,7 @@ function library:create()
             slider_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
             slider_container.BorderSizePixel = 0
             slider_container.Parent = page
-            
+            slider_container.LayoutOrder = #page:GetChildren() 
 
             local container_corner = Instance.new("UICorner")
             container_corner.CornerRadius = UDim.new(0, 6)
@@ -514,7 +514,7 @@ function library:create()
             dropdown_container.Size = UDim2.new(1, -15, 0, 38)
             dropdown_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
             dropdown_container.ClipsDescendants = true
-            
+            dropdown_container.LayoutOrder = #page:GetChildren()
 
             local corner = Instance.new("UICorner")
             corner.CornerRadius = UDim.new(0, 6)
@@ -642,7 +642,7 @@ function library:create()
             picker_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
             picker_container.ClipsDescendants = true
             picker_container.Parent = page
-            
+            picker_container.LayoutOrder = #page:GetChildren()
 
             Instance.new("UICorner", picker_container).CornerRadius = UDim.new(0, 6)
 
@@ -863,7 +863,7 @@ function library:create()
             button_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
             button_container.BorderSizePixel = 0
             button_container.Parent = page
-           
+            button_container.LayoutOrder = #page:GetChildren()
 
             local container_corner = Instance.new("UICorner")
             container_corner.CornerRadius = UDim.new(0, 6)
@@ -923,7 +923,7 @@ function library:create()
             input_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
             input_container.BorderSizePixel = 0
             input_container.Parent = page
-        
+            input_container.LayoutOrder = #page:GetChildren()
 
             local container_corner = Instance.new("UICorner")
             container_corner.CornerRadius = UDim.new(0, 6)
