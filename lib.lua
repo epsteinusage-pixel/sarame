@@ -1092,6 +1092,82 @@ function library:create()
         return tab
     end
 
+    function window:toggle_watermark(enabled)
+        local watermark = screen_gui:FindFirstChild("Watermark")
+        
+        if enabled and not watermark then
+            watermark = Instance.new("Frame")
+            watermark.Name = "Watermark"
+            watermark.Size = UDim2.new(0, 250, 0, 35)
+            watermark.Position = UDim2.new(1, -260, 0, 10)
+            watermark.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            watermark.BorderSizePixel = 0
+            watermark.Parent = screen_gui
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 6)
+            corner.Parent = watermark
+            
+            local stroke = Instance.new("UIStroke")
+            stroke.Thickness = 1.5
+            stroke.Color = Color3.fromRGB(0, 0, 0)
+            stroke.Parent = watermark
+            
+            local accent_line = Instance.new("Frame")
+            accent_line.Size = UDim2.new(1, 0, 0, 3)
+            accent_line.Position = UDim2.new(0, 0, 0, 0)
+            accent_line.BackgroundColor3 = Color3.fromRGB(106, 152, 242)
+            accent_line.BorderSizePixel = 0
+            accent_line.Parent = watermark
+            
+            local line_corner = Instance.new("UICorner")
+            line_corner.CornerRadius = UDim.new(0, 6)
+            line_corner.Parent = accent_line
+            
+            local text_label = Instance.new("TextLabel")
+            text_label.Size = UDim2.new(1, -10, 1, -8)
+            text_label.Position = UDim2.new(0, 5, 0, 6)
+            text_label.BackgroundTransparency = 1
+            text_label.RichText = true
+            text_label.Text = '<font color="rgb(106, 152, 242)">Anarchy</font> <font color="rgb(255, 255, 255)">| FPS: 60 | Ping: 0ms</font>'
+            text_label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            text_label.TextSize = 14
+            text_label.Font = Enum.Font.Roboto
+            text_label.TextXAlignment = Enum.TextXAlignment.Left
+            text_label.Parent = watermark
+            
+            local text_stroke = Instance.new("UIStroke")
+            text_stroke.Thickness = 1.5
+            text_stroke.Color = Color3.fromRGB(0, 0, 0)
+            text_stroke.Parent = text_label
+            
+            local fps_counter = 0
+            local last_time = tick()
+            
+            table.insert(connections, run_service.RenderStepped:Connect(function()
+                fps_counter = fps_counter + 1
+                local current_time = tick()
+                
+                if current_time - last_time >= 1 then
+                    local fps = math.floor(fps_counter / (current_time - last_time))
+                    local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+                    
+                    text_label.Text = string.format(
+                        '<font color="rgb(106, 152, 242)">Anarchy</font> <font color="rgb(255, 255, 255)">| FPS: %d | Ping: %dms</font>',
+                        fps,
+                        ping
+                    )
+                    
+                    fps_counter = 0
+                    last_time = current_time
+                end
+            end))
+            
+        elseif not enabled and watermark then
+            watermark:Destroy()
+        end
+    end
+
     local function make_draggable(obj, target)
         target = target or obj
         local dragging, drag_start, start_pos
