@@ -847,7 +847,6 @@ function library:create()
             end)
         end
 
-     
         function tab:add_button(name, callback)
             local layout = page:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", page)
             layout.Padding = UDim.new(0, 8)
@@ -997,8 +996,111 @@ function library:create()
             end)
         end
 
+        function tab:add_keybind(name, default_key, callback)
+            local layout = page:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", page)
+            layout.Padding = UDim.new(0, 8)
+            layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+            layout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+            local container_padding = page:FindFirstChild("UIPadding") or Instance.new("UIPadding", page)
+            container_padding.PaddingTop = UDim.new(0, 15)
+
+            local keybind_container = Instance.new("Frame")
+            keybind_container.Name = name .. "_Keybind"
+            keybind_container.Size = UDim2.new(1, -15, 0, 38)
+            keybind_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            keybind_container.BorderSizePixel = 0
+            keybind_container.Parent = page
+            keybind_container.LayoutOrder = #page:GetChildren()
+
+            local container_corner = Instance.new("UICorner")
+            container_corner.CornerRadius = UDim.new(0, 6)
+            container_corner.Parent = keybind_container
+
+            local container_stroke = Instance.new("UIStroke")
+            container_stroke.Thickness = 0.5
+            container_stroke.Color = Color3.fromRGB(120, 120, 120)
+            container_stroke.Parent = keybind_container
+
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, -70, 1, 0)
+            label.Position = UDim2.new(0, 12, 0, 0)
+            label.BackgroundTransparency = 1
+            label.Text = name
+            label.TextColor3 = Color3.fromRGB(220, 220, 220)
+            label.TextSize = 14
+            label.Font = Enum.Font.Roboto
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.Parent = keybind_container
+
+            local label_stroke = Instance.new("UIStroke")
+            label_stroke.Thickness = 1.5
+            label_stroke.Color = Color3.fromRGB(0, 0, 0)
+            label_stroke.Parent = label
+
+            local current_bind = default_key
+            local binding = false
+
+            local keybind_btn = Instance.new("TextButton")
+            keybind_btn.Size = UDim2.new(0, 50, 0, 22)
+            keybind_btn.Position = UDim2.new(1, -60, 0.5, -11)
+            keybind_btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            keybind_btn.Text = default_key and default_key.Name or "None"
+            keybind_btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+            keybind_btn.TextSize = 12
+            keybind_btn.Font = Enum.Font.Roboto
+            keybind_btn.Parent = keybind_container
+
+            local bind_corner = Instance.new("UICorner")
+            bind_corner.CornerRadius = UDim.new(0, 4)
+            bind_corner.Parent = keybind_btn
+
+            local bind_stroke = Instance.new("UIStroke")
+            bind_stroke.Thickness = 0.5
+            bind_stroke.Color = Color3.fromRGB(0, 0, 0)
+            bind_stroke.Parent = keybind_btn
+
+            keybind_btn.MouseButton1Click:Connect(function()
+                binding = true
+                keybind_btn.Text = "..."
+                keybind_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
+            end)
+
+            user_input_service.InputBegan:Connect(function(input)
+                if binding and input.UserInputType == Enum.UserInputType.Keyboard then
+                    if input.KeyCode == Enum.KeyCode.Escape then
+                        current_bind = nil
+                        keybind_btn.Text = "None"
+                    else
+                        current_bind = input.KeyCode
+                        keybind_btn.Text = input.KeyCode.Name
+                    end
+                    keybind_btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+                    binding = false
+                elseif not binding and current_bind and input.KeyCode == current_bind and not user_input_service:GetFocusedTextBox() then
+                    callback()
+                end
+            end)
+        end
+
         table.insert(window.tabs, tab)
         return tab
+    end
+
+    function window:toggle_gui()
+        gui_visible = not gui_visible
+        if gui_visible then
+            main_outer.Visible = true
+            tween_service:Create(main_outer, TweenInfo.new(0.3, Enum.EasingStyle.Quart), 
+                {Size = UDim2.new(0, 600, 0, 400)}):Play()
+        else
+            local hide_tween = tween_service:Create(main_outer, TweenInfo.new(0.3, Enum.EasingStyle.Quart), 
+                {Size = UDim2.new(0, 0, 0, 0)})
+            hide_tween:Play()
+            hide_tween.Completed:Connect(function()
+                main_outer.Visible = false
+            end)
+        end
     end
 
     local gui_visible = true
