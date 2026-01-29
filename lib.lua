@@ -302,7 +302,13 @@ function library:create()
                 local bind_stroke = Instance.new("UIStroke")
                 bind_stroke.Thickness = 0.5
                 bind_stroke.Color = Color3.fromRGB(0, 0, 0)
-                bind_stroke.Parent = keybind_btn
+                bind_stroke.Parent = keybind_btnà
+
+                table.insert(connections, keybind_btn.MouseButton1Click:Connect(function()
+                    binding = true
+                    keybind_btn.Text = "..."
+                    keybind_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
+                end))
 
                 table.insert(connections, user_input_service.InputBegan:Connect(function(input)
                     if binding and input.UserInputType == Enum.UserInputType.Keyboard then
@@ -326,6 +332,8 @@ function library:create()
                         window:update_keybind_display(name, current_bind.Name, enabled)
                     end
                 end))
+
+
             end
 
             local switch_bg = Instance.new("TextButton")
