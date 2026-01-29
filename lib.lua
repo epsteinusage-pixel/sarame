@@ -304,23 +304,26 @@ function library:create()
                 bind_stroke.Color = Color3.fromRGB(0, 0, 0)
                 bind_stroke.Parent = keybind_btn
 
-                table.insert(connections, keybind_btn.MouseButton1Click:Connect(function()
-                    binding = true
-                    keybind_btn.Text = "..."
-                    keybind_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
-                end))
-
                 table.insert(connections, user_input_service.InputBegan:Connect(function(input)
                     if binding and input.UserInputType == Enum.UserInputType.Keyboard then
                         if input.KeyCode == Enum.KeyCode.Escape then
                             current_bind = nil
                             keybind_btn.Text = "None"
+                            window:update_keybind_display(name, "None", enabled)
                         else
                             current_bind = input.KeyCode
                             keybind_btn.Text = input.KeyCode.Name
+                            window:update_keybind_display(name, input.KeyCode.Name, enabled)
                         end
                         keybind_btn.TextColor3 = Color3.fromRGB(180, 180, 180)
                         binding = false
+                    end
+                end))
+
+                table.insert(connections, user_input_service.InputBegan:Connect(function(input)
+                    if has_bind and not binding and current_bind and input.KeyCode == current_bind and not user_input_service:GetFocusedTextBox() then
+                        toggle()
+                        window:update_keybind_display(name, current_bind.Name, enabled)
                     end
                 end))
             end
@@ -372,6 +375,10 @@ function library:create()
                 tween_service:Create(bg_accent_stroke, TweenInfo.new(0.2), {Color = target_accent}):Play()
                 tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = target_text}):Play()
 
+                if has_bind and current_bind then
+                    window:update_keybind_display(name, current_bind.Name, enabled)
+                end
+                
                 callback(enabled)
             end
 
@@ -1092,54 +1099,60 @@ function library:create()
         return tab
     end
 
+    
+    local function make_draggable(obj, target)
+        target = target or obj
+        local dragging, drag_start, start_pos
+
+        table.insert(connections, obj.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                drag_start = input.Position
+                start_pos = target.Position
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end))
+
+        table.insert(connections, user_input_service.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - drag_start
+                target.Position = UDim2.new(start_pos.X.Scale, start_pos.X.Offset + delta.X, start_pos.Y.Scale, start_pos.Y.Offset + delta.Y)
+            end
+        end))
+    end
+
     function window:toggle_watermark(enabled)
         local watermark = screen_gui:FindFirstChild("Watermark")
         
         if enabled and not watermark then
-            watermark = Instance.new("Frame")
-            watermark.Name = "Watermark"
-            watermark.Size = UDim2.new(0, 250, 0, 35)
-            watermark.Position = UDim2.new(1, -260, 0, 10)
-            watermark.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-            watermark.BorderSizePixel = 0
-            watermark.Parent = screen_gui
-            
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 6)
-            corner.Parent = watermark
-            
-            local stroke = Instance.new("UIStroke")
-            stroke.Thickness = 1.5
-            stroke.Color = Color3.fromRGB(0, 0, 0)
-            stroke.Parent = watermark
-            
-            local accent_line = Instance.new("Frame")
-            accent_line.Size = UDim2.new(1, 0, 0, 3)
-            accent_line.Position = UDim2.new(0, 0, 0, 0)
-            accent_line.BackgroundColor3 = Color3.fromRGB(106, 152, 242)
-            accent_line.BorderSizePixel = 0
-            accent_line.Parent = watermark
-            
-            local line_corner = Instance.new("UICorner")
-            line_corner.CornerRadius = UDim.new(0, 6)
-            line_corner.Parent = accent_line
-            
+            local watermark_outer, watermark_inner = create_sandwich("watermark", UDim2.new(0, 280, 0, 30), UDim2.new(1, -290, 0, 10), screen_gui)
+            watermark_outer.Name = "Watermark"
+            watermark_inner.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                        
+        
             local text_label = Instance.new("TextLabel")
-            text_label.Size = UDim2.new(1, -10, 1, -8)
-            text_label.Position = UDim2.new(0, 5, 0, 6)
+            text_label.Size = UDim2.new(1, -10, 1, 0)
+            text_label.Position = UDim2.new(0, 5, 0, 0)
             text_label.BackgroundTransparency = 1
             text_label.RichText = true
             text_label.Text = '<font color="rgb(106, 152, 242)">Anarchy</font> <font color="rgb(255, 255, 255)">| FPS: 60 | Ping: 0ms</font>'
             text_label.TextColor3 = Color3.fromRGB(255, 255, 255)
-            text_label.TextSize = 14
+            text_label.TextSize = 16
             text_label.Font = Enum.Font.Roboto
-            text_label.TextXAlignment = Enum.TextXAlignment.Left
-            text_label.Parent = watermark
+            text_label.TextXAlignment = Enum.TextXAlignment.Center
+            text_label.Parent = watermark_inner
             
             local text_stroke = Instance.new("UIStroke")
             text_stroke.Thickness = 1.5
             text_stroke.Color = Color3.fromRGB(0, 0, 0)
             text_stroke.Parent = text_label
+            
+            make_draggable(watermark_inner, watermark_outer)
             
             local fps_counter = 0
             local last_time = tick()
@@ -1168,31 +1181,93 @@ function library:create()
         end
     end
 
-    local function make_draggable(obj, target)
-        target = target or obj
-        local dragging, drag_start, start_pos
-
-        table.insert(connections, obj.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                drag_start = input.Position
-                start_pos = target.Position
-
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        dragging = false
-                    end
-                end)
-            end
-        end))
-
-        table.insert(connections, user_input_service.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                local delta = input.Position - drag_start
-                target.Position = UDim2.new(start_pos.X.Scale, start_pos.X.Offset + delta.X, start_pos.Y.Scale, start_pos.Y.Offset + delta.Y)
-            end
-        end))
+    function window:toggle_keybind_list(enabled)
+        local keybind_list = screen_gui:FindFirstChild("KeybindList")
+        
+        if enabled and not keybind_list then
+            local list_outer, list_inner = create_sandwich("keybindlist", UDim2.new(0, 200, 0, 200), UDim2.new(0, 10, 0.5, -100), screen_gui)
+            list_outer.Name = "KeybindList"
+            list_inner.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            list_inner.ClipsDescendants = true
+            
+            local title = Instance.new("TextLabel")
+            title.Size = UDim2.new(1, 0, 0, 25)
+            title.BackgroundTransparency = 1
+            title.Text = "Keybinds"
+            title.TextColor3 = Color3.fromRGB(106, 152, 242)
+            title.TextSize = 16
+            title.Font = Enum.Font.Roboto
+            title.Parent = list_inner
+            
+            local title_stroke = Instance.new("UIStroke")
+            title_stroke.Thickness = 1.5
+            title_stroke.Color = Color3.fromRGB(0, 0, 0)
+            title_stroke.Parent = title
+            
+            local separator = Instance.new("Frame")
+            separator.Size = UDim2.new(1, -10, 0, 1)
+            separator.Position = UDim2.new(0, 5, 0, 25)
+            separator.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            separator.BorderSizePixel = 0
+            separator.Parent = list_inner
+            
+            local scroll = Instance.new("ScrollingFrame")
+            scroll.Size = UDim2.new(1, -10, 1, -30)
+            scroll.Position = UDim2.new(0, 5, 0, 28)
+            scroll.BackgroundTransparency = 1
+            scroll.ScrollBarThickness = 2
+            scroll.ScrollBarImageColor3 = Color3.fromRGB(106, 152, 242)
+            scroll.BorderSizePixel = 0
+            scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+            scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+            scroll.Parent = list_inner
+            
+            local layout = Instance.new("UIListLayout")
+            layout.Padding = UDim.new(0, 3)
+            layout.Parent = scroll
+            
+            make_draggable(list_inner, list_outer)
+            
+            window.keybind_list_scroll = scroll
+            
+        elseif not enabled and keybind_list then
+            keybind_list:Destroy()
+            window.keybind_list_scroll = nil
+        end
     end
+
+    function window:update_keybind_display(name, key, is_enabled)
+        if not window.keybind_list_scroll then return end
+        
+        local scroll = window.keybind_list_scroll
+        local existing = scroll:FindFirstChild(name .. "_Bind")
+        
+        if not key or key == "None" then
+            if existing then existing:Destroy() end
+            return
+        end
+        
+        if not existing then
+            existing = Instance.new("TextLabel")
+            existing.Name = name .. "_Bind"
+            existing.Size = UDim2.new(1, 0, 0, 20)
+            existing.BackgroundTransparency = 1
+            existing.RichText = true
+            existing.Font = Enum.Font.Roboto
+            existing.TextSize = 13
+            existing.TextXAlignment = Enum.TextXAlignment.Left
+            existing.Parent = scroll
+            
+            local stroke = Instance.new("UIStroke")
+            stroke.Thickness = 1.2
+            stroke.Color = Color3.fromRGB(0, 0, 0)
+            stroke.Parent = existing
+        end
+        
+        local color = is_enabled and "rgb(106, 152, 242)" or "rgb(150, 150, 150)"
+        existing.Text = string.format('<font color="%s">%s [%s]</font>', color, name, key)
+    end
+
 
     make_draggable(main_inner, main_outer)
     make_draggable(toggle_btn, toggle_outer)
