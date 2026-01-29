@@ -1,10 +1,13 @@
 local user_input_service = game:GetService("UserInputService")
 local tween_service = game:GetService("TweenService")
 local players = game:GetService("Players")
+local run_service = game:GetService("RunService")
 
 local library = {}
 
 function library:create()
+    local connections = {}
+    
     local screen_gui = Instance.new("ScreenGui")
     screen_gui.Name = "anarchy_gui"
     screen_gui.ResetOnSpawn = false
@@ -86,7 +89,9 @@ function library:create()
     toggle_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
     toggle_btn.Parent = toggle_inner
 
-    toggle_btn.MouseButton1Click:Connect(function()
+    local gui_visible = true
+
+    table.insert(connections, toggle_btn.MouseButton1Click:Connect(function()
         gui_visible = not gui_visible
         if gui_visible then
             main_outer.Visible = true
@@ -100,7 +105,7 @@ function library:create()
                 main_outer.Visible = false
             end)
         end
-    end)
+    end))
     
     local btn_stroke = Instance.new("UIStroke")
     btn_stroke.Thickness = 1.5
@@ -216,7 +221,7 @@ function library:create()
         page.BorderSizePixel = 0
         page.CanvasSize = UDim2.new(0, 0, 2, 0)
 
-        tab_button.MouseButton1Click:Connect(function()
+        table.insert(connections, tab_button.MouseButton1Click:Connect(function()
             for _, btn in pairs(tab_container:GetChildren()) do
                 if btn:IsA("TextButton") then
                     tween_service:Create(btn, TweenInfo.new(0.3, Enum.EasingStyle.Sine), {TextColor3 = Color3.fromRGB(150, 150, 150)}):Play()
@@ -229,7 +234,7 @@ function library:create()
             end
             page.Visible = true
             tween_service:Create(tab_button, TweenInfo.new(0.3, Enum.EasingStyle.Sine), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
-        end)
+        end))
 
         local tab = {}
         tab.page = page
@@ -299,13 +304,13 @@ function library:create()
                 bind_stroke.Color = Color3.fromRGB(0, 0, 0)
                 bind_stroke.Parent = keybind_btn
 
-                keybind_btn.MouseButton1Click:Connect(function()
+                table.insert(connections, keybind_btn.MouseButton1Click:Connect(function()
                     binding = true
                     keybind_btn.Text = "..."
                     keybind_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
-                end)
+                end))
 
-                user_input_service.InputBegan:Connect(function(input)
+                table.insert(connections, user_input_service.InputBegan:Connect(function(input)
                     if binding and input.UserInputType == Enum.UserInputType.Keyboard then
                         if input.KeyCode == Enum.KeyCode.Escape then
                             current_bind = nil
@@ -317,7 +322,7 @@ function library:create()
                         keybind_btn.TextColor3 = Color3.fromRGB(180, 180, 180)
                         binding = false
                     end
-                end)
+                end))
             end
 
             local switch_bg = Instance.new("TextButton")
@@ -370,13 +375,13 @@ function library:create()
                 callback(enabled)
             end
 
-            switch_bg.MouseButton1Click:Connect(toggle)
+            table.insert(connections, switch_bg.MouseButton1Click:Connect(toggle))
 
-            user_input_service.InputBegan:Connect(function(input)
+            table.insert(connections, user_input_service.InputBegan:Connect(function(input)
                 if has_bind and not binding and current_bind and input.KeyCode == current_bind and not user_input_service:GetFocusedTextBox() then
                     toggle()
                 end
-            end)
+            end))
         end
 
         function tab:add_slider(name, min, max, default, callback)
@@ -485,27 +490,27 @@ function library:create()
                 callback(value)
             end
 
-            knob.InputBegan:Connect(function(input)
+            table.insert(connections, knob.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = true
                     tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
                     tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
                 end
-            end)
+            end))
 
-            user_input_service.InputEnded:Connect(function(input)
+            table.insert(connections, user_input_service.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = false
                     tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
                     tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
                 end
-            end)
+            end))
 
-            user_input_service.InputChanged:Connect(function(input)
+            table.insert(connections, user_input_service.InputChanged:Connect(function(input)
                 if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
                     move()
                 end
-            end)
+            end))
         end
 
         function tab:add_dropdown(name, options, is_multi, callback)
@@ -580,7 +585,7 @@ function library:create()
             local expanded = false
             local selected_options = {}
 
-            trigger.MouseButton1Click:Connect(function()
+            table.insert(connections, trigger.MouseButton1Click:Connect(function()
                 expanded = not expanded
                 local target_size = expanded and UDim2.new(1, -15, 0, 135) or UDim2.new(1, -15, 0, 38)
                 tween_service:Create(dropdown_container, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = target_size}):Play()
@@ -588,7 +593,7 @@ function library:create()
                     option_holder.CanvasPosition = Vector2.new(0, 0)
                 end
                 arrow.Text = expanded and "▲" or "▼"
-            end)
+            end))
 
             for _, option in ipairs(options) do
                 local opt_btn = Instance.new("TextButton")
@@ -609,7 +614,7 @@ function library:create()
                 opt_stroke.Color = Color3.fromRGB(0, 0, 0)
                 opt_stroke.Parent = opt_btn
 
-                opt_btn.MouseButton1Click:Connect(function()
+                table.insert(connections, opt_btn.MouseButton1Click:Connect(function()
                     if is_multi then
                         if table.find(selected_options, option) then
                             table.remove(selected_options, table.find(selected_options, option))
@@ -629,7 +634,7 @@ function library:create()
                         arrow.Text = "▼"
                         callback(option)
                     end
-                end)
+                end))
             end
 
             dropdown_container.Parent = page
@@ -816,35 +821,35 @@ function library:create()
                     update()
                 end
 
-                obj.InputBegan:Connect(function(i)
+                table.insert(connections, obj.InputBegan:Connect(function(i)
                     if i.UserInputType == Enum.UserInputType.MouseButton1 then
                         active = true
                         move(i)
                     end
-                end)
+                end))
 
-                user_input_service.InputChanged:Connect(function(i)
+                table.insert(connections, user_input_service.InputChanged:Connect(function(i)
                     if active and i.UserInputType == Enum.UserInputType.MouseMovement then
                         move(i)
                     end
-                end)
+                end))
 
-                user_input_service.InputEnded:Connect(function(i)
+                table.insert(connections, user_input_service.InputEnded:Connect(function(i)
                     if i.UserInputType == Enum.UserInputType.MouseButton1 then
                         active = false
                     end
-                end)
+                end))
             end
 
             setup_drag(hue_bar, false)
             setup_drag(trans_bar, false)
             setup_drag(picker_square, true)
 
-            color_display.MouseButton1Click:Connect(function()
+            table.insert(connections, color_display.MouseButton1Click:Connect(function()
                 local is_expanded = picker_container.Size.Y.Offset > 50
                 local target_y = is_expanded and 38 or 150
                 tween_service:Create(picker_container, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(1, -15, 0, target_y)}):Play()
-            end)
+            end))
         end
 
         function tab:add_button(name, callback)
@@ -887,7 +892,7 @@ function library:create()
             button_stroke.Color = Color3.fromRGB(0, 0, 0)
             button_stroke.Parent = button
 
-            button.MouseButton1Click:Connect(function()
+            table.insert(connections, button.MouseButton1Click:Connect(function()
                 tween_service:Create(button, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
                 tween_service:Create(container_stroke, TweenInfo.new(0.1), {Color = Color3.fromRGB(106, 152, 242)}):Play()
                 
@@ -896,15 +901,15 @@ function library:create()
                 task.wait(0.1)
                 tween_service:Create(button, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
                 tween_service:Create(container_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(120, 120, 120)}):Play()
-            end)
+            end))
 
-            button.MouseEnter:Connect(function()
+            table.insert(connections, button.MouseEnter:Connect(function()
                 tween_service:Create(button_container, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}):Play()
-            end)
+            end))
 
-            button.MouseLeave:Connect(function()
+            table.insert(connections, button.MouseLeave:Connect(function()
                 tween_service:Create(button_container, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
-            end)
+            end))
         end
 
         function tab:add_input_text_field(name, placeholder, callback)
@@ -977,23 +982,23 @@ function library:create()
             textbox_padding.PaddingRight = UDim.new(0, 8)
             textbox_padding.Parent = text_box
 
-            text_box.Focused:Connect(function()
+            table.insert(connections, text_box.Focused:Connect(function()
                 tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(0, 0, 0)}):Play()
                 tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
-            end)
+            end))
 
-            text_box.FocusLost:Connect(function(enter_pressed)
+            table.insert(connections, text_box.FocusLost:Connect(function(enter_pressed)
                 tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(0, 0, 0)}):Play()
                 tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
                 
                 if enter_pressed then
                     callback(text_box.Text)
                 end
-            end)
+            end))
 
-            text_box:GetPropertyChangedSignal("Text"):Connect(function()
+            table.insert(connections, text_box:GetPropertyChangedSignal("Text"):Connect(function()
                 callback(text_box.Text)
-            end)
+            end))
         end
 
         function tab:add_keybind(name, default_key, callback)
@@ -1060,13 +1065,13 @@ function library:create()
             bind_stroke.Color = Color3.fromRGB(0, 0, 0)
             bind_stroke.Parent = keybind_btn
 
-            keybind_btn.MouseButton1Click:Connect(function()
+            table.insert(connections, keybind_btn.MouseButton1Click:Connect(function()
                 binding = true
                 keybind_btn.Text = "..."
                 keybind_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
-            end)
+            end))
 
-            user_input_service.InputBegan:Connect(function(input)
+            table.insert(connections, user_input_service.InputBegan:Connect(function(input)
                 if binding and input.UserInputType == Enum.UserInputType.Keyboard then
                     if input.KeyCode == Enum.KeyCode.Escape then
                         current_bind = nil
@@ -1080,12 +1085,72 @@ function library:create()
                 elseif not binding and current_bind and input.KeyCode == current_bind and not user_input_service:GetFocusedTextBox() then
                     callback()
                 end
-            end)
+            end))
         end
 
         table.insert(window.tabs, tab)
         return tab
     end
+
+    local function make_draggable(obj, target)
+        target = target or obj
+        local dragging, drag_start, start_pos
+
+        table.insert(connections, obj.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                drag_start = input.Position
+                start_pos = target.Position
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end))
+
+        table.insert(connections, user_input_service.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - drag_start
+                target.Position = UDim2.new(start_pos.X.Scale, start_pos.X.Offset + delta.X, start_pos.Y.Scale, start_pos.Y.Offset + delta.Y)
+            end
+        end))
+    end
+
+    make_draggable(main_inner, main_outer)
+    make_draggable(toggle_btn, toggle_outer)
+
+    local minimized = false
+
+    table.insert(connections, mini_btn.MouseButton1Click:Connect(function()
+        minimized = not minimized
+        local target_size = minimized and UDim2.new(0, 300, 0, 35) or UDim2.new(0, 600, 0, 400)
+        mini_btn.Text = minimized and "+" or "-"
+        tween_service:Create(main_outer, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = target_size}):Play()
+
+        if minimized then
+            container_holder.Visible = false
+            horizontal_separator.Visible = false
+        else
+            task.delay(0.1, function()
+                container_holder.Visible = true
+                horizontal_separator.Visible = true
+            end)
+        end
+    end))
+
+    close_btn.MouseButton1Click:Connect(function()
+        for _, conn in pairs(connections) do
+            conn:Disconnect()
+        end
+        
+        local close_tween = tween_service:Create(main_outer, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+        close_tween:Play()
+        close_tween.Completed:Connect(function()
+            screen_gui:Destroy()
+        end)
+    end)
 
     function window:toggle_gui()
         gui_visible = not gui_visible
@@ -1102,64 +1167,6 @@ function library:create()
             end)
         end
     end
-
-    local gui_visible = true
-
-    local function make_draggable(obj, target)
-        target = target or obj
-        local dragging, drag_start, start_pos
-
-        obj.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                drag_start = input.Position
-                start_pos = target.Position
-
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        dragging = false
-                    end
-                end)
-            end
-        end)
-
-        user_input_service.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                local delta = input.Position - drag_start
-                target.Position = UDim2.new(start_pos.X.Scale, start_pos.X.Offset + delta.X, start_pos.Y.Scale, start_pos.Y.Offset + delta.Y)
-            end
-        end)
-    end
-
-    make_draggable(main_inner, main_outer)
-    make_draggable(toggle_btn, toggle_outer)
-
-    local minimized = false
-
-    mini_btn.MouseButton1Click:Connect(function()
-        minimized = not minimized
-        local target_size = minimized and UDim2.new(0, 300, 0, 35) or UDim2.new(0, 600, 0, 400)
-        mini_btn.Text = minimized and "+" or "-"
-        tween_service:Create(main_outer, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = target_size}):Play()
-
-        if minimized then
-            container_holder.Visible = false
-            horizontal_separator.Visible = false
-        else
-            task.delay(0.1, function()
-                container_holder.Visible = true
-                horizontal_separator.Visible = true
-            end)
-        end
-    end)
-
-    close_btn.MouseButton1Click:Connect(function()
-        local close_tween = tween_service:Create(main_outer, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
-        close_tween:Play()
-        close_tween.Completed:Connect(function()
-            screen_gui:Destroy()
-        end)
-    end)
 
     return window
 end
