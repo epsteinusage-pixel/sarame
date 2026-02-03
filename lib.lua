@@ -1092,6 +1092,275 @@ function library:create()
         return tab
     end
 
+    function tab:add_config_system()
+    local layout = self.page:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", self.page)
+    layout.Padding = UDim.new(0, 8)
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    layout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+    local container_padding = self.page:FindFirstChild("UIPadding") or Instance.new("UIPadding", self.page)
+    container_padding.PaddingTop = UDim.new(0, 15)
+
+    local config_container = Instance.new("Frame")
+    config_container.Name = "config_container"
+    config_container.Size = UDim2.new(1, -15, 0, 150)
+    config_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    config_container.BorderSizePixel = 0
+    config_container.Parent = self.page
+    config_container.LayoutOrder = #self.page:GetChildren()
+
+    local container_corner = Instance.new("UICorner")
+    container_corner.CornerRadius = UDim.new(0, 6)
+    container_corner.Parent = config_container
+
+    local container_stroke = Instance.new("UIStroke")
+    container_stroke.Thickness = 0.5
+    container_stroke.Color = Color3.fromRGB(120, 120, 120)
+    container_stroke.Parent = config_container
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -24, 0, 20)
+    label.Position = UDim2.new(0, 12, 0, 5)
+    label.BackgroundTransparency = 1
+    label.Text = "Config System"
+    label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    label.TextSize = 14
+    label.Font = Enum.Font.Roboto
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = config_container
+
+    local label_stroke = Instance.new("UIStroke")
+    label_stroke.Thickness = 1.5
+    label_stroke.Color = Color3.fromRGB(0, 0, 0)
+    label_stroke.Parent = label
+
+    local config_name_box = Instance.new("TextBox")
+    config_name_box.Size = UDim2.new(1, -24, 0, 26)
+    config_name_box.Position = UDim2.new(0, 12, 0, 28)
+    config_name_box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    config_name_box.Text = ""
+    config_name_box.PlaceholderText = "Config name..."
+    config_name_box.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+    config_name_box.TextColor3 = Color3.fromRGB(200, 200, 200)
+    config_name_box.TextSize = 13
+    config_name_box.Font = Enum.Font.Roboto
+    config_name_box.TextXAlignment = Enum.TextXAlignment.Left
+    config_name_box.ClearTextOnFocus = false
+    config_name_box.Parent = config_container
+
+    local textbox_corner = Instance.new("UICorner")
+    textbox_corner.CornerRadius = UDim.new(0, 4)
+    textbox_corner.Parent = config_name_box
+
+    local textbox_stroke = Instance.new("UIStroke")
+    textbox_stroke.Thickness = 1
+    textbox_stroke.Color = Color3.fromRGB(0, 0, 0)
+    textbox_stroke.Parent = config_name_box
+
+    local textbox_padding = Instance.new("UIPadding")
+    textbox_padding.PaddingLeft = UDim.new(0, 8)
+    textbox_padding.PaddingRight = UDim.new(0, 8)
+    textbox_padding.Parent = config_name_box
+
+    local save_btn = Instance.new("TextButton")
+    save_btn.Size = UDim2.new(0.3, -15, 0, 26)
+    save_btn.Position = UDim2.new(0, 12, 0, 60)
+    save_btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    save_btn.Text = "Save"
+    save_btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    save_btn.TextSize = 13
+    save_btn.Font = Enum.Font.Roboto
+    save_btn.Parent = config_container
+
+    local save_corner = Instance.new("UICorner")
+    save_corner.CornerRadius = UDim.new(0, 4)
+    save_corner.Parent = save_btn
+
+    local save_stroke = Instance.new("UIStroke")
+    save_stroke.Thickness = 1
+    save_stroke.Color = Color3.fromRGB(0, 0, 0)
+    save_stroke.Parent = save_btn
+
+    local load_btn = Instance.new("TextButton")
+    load_btn.Size = UDim2.new(0.3, -15, 0, 26)
+    load_btn.Position = UDim2.new(0.35, 6, 0, 60)
+    load_btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    load_btn.Text = "Load"
+    load_btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    load_btn.TextSize = 13
+    load_btn.Font = Enum.Font.Roboto
+    load_btn.Parent = config_container
+
+    local load_corner = Instance.new("UICorner")
+    load_corner.CornerRadius = UDim.new(0, 4)
+    load_corner.Parent = load_btn
+
+    local load_stroke = Instance.new("UIStroke")
+    load_stroke.Thickness = 1
+    load_stroke.Color = Color3.fromRGB(0, 0, 0)
+    load_stroke.Parent = load_btn
+
+    local overwrite_btn = Instance.new("TextButton")
+    overwrite_btn.Size = UDim2.new(0.3, -15, 0, 26)
+    overwrite_btn.Position = UDim2.new(0.7, 3, 0, 60)
+    overwrite_btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    overwrite_btn.Text = "Overwrite"
+    overwrite_btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    overwrite_btn.TextSize = 13
+    overwrite_btn.Font = Enum.Font.Roboto
+    overwrite_btn.Parent = config_container
+
+    local overwrite_corner = Instance.new("UICorner")
+    overwrite_corner.CornerRadius = UDim.new(0, 4)
+    overwrite_corner.Parent = overwrite_btn
+
+    local overwrite_stroke = Instance.new("UIStroke")
+    overwrite_stroke.Thickness = 1
+    overwrite_stroke.Color = Color3.fromRGB(0, 0, 0)
+    overwrite_stroke.Parent = overwrite_btn
+
+    local delete_btn = Instance.new("TextButton")
+    delete_btn.Size = UDim2.new(0.3, -15, 0, 26)
+    delete_btn.Position = UDim2.new(0, 12, 0, 92)
+    delete_btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    delete_btn.Text = "Delete"
+    delete_btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    delete_btn.TextSize = 13
+    delete_btn.Font = Enum.Font.Roboto
+    delete_btn.Parent = config_container
+
+    local delete_corner = Instance.new("UICorner")
+    delete_corner.CornerRadius = UDim.new(0, 4)
+    delete_corner.Parent = delete_btn
+
+    local delete_stroke = Instance.new("UIStroke")
+    delete_stroke.Thickness = 1
+    delete_stroke.Color = Color3.fromRGB(0, 0, 0)
+    delete_stroke.Parent = delete_btn
+
+    local autoload_btn = Instance.new("TextButton")
+    autoload_btn.Size = UDim2.new(0.3, -15, 0, 26)
+    autoload_btn.Position = UDim2.new(0.35, 6, 0, 92)
+    autoload_btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    autoload_btn.Text = "Set as Autoload"
+    autoload_btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    autoload_btn.TextSize = 13
+    autoload_btn.Font = Enum.Font.Roboto
+    autoload_btn.Parent = config_container
+
+    local autoload_corner = Instance.new("UICorner")
+    autoload_corner.CornerRadius = UDim.new(0, 4)
+    autoload_corner.Parent = autoload_btn
+
+    local autoload_stroke = Instance.new("UIStroke")
+    autoload_stroke.Thickness = 1
+    autoload_stroke.Color = Color3.fromRGB(0, 0, 0)
+    autoload_stroke.Parent = autoload_btn
+
+    local config_list = Instance.new("ScrollingFrame")
+    config_list.Size = UDim2.new(1, -24, 0, 26)
+    config_list.Position = UDim2.new(0, 12, 0, 124)
+    config_list.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    config_list.BorderSizePixel = 0
+    config_list.ScrollBarThickness = 2
+    config_list.ScrollBarImageColor3 = Color3.fromRGB(106, 152, 242)
+    config_list.Parent = config_container
+
+    local list_layout = Instance.new("UIListLayout")
+    list_layout.Padding = UDim.new(0, 4)
+    list_layout.FillDirection = Enum.FillDirection.Horizontal
+    list_layout.Parent = config_list
+
+    local config_padding = Instance.new("UIPadding")
+    config_padding.PaddingLeft = UDim.new(0, 4)
+    config_padding.PaddingRight = UDim.new(0, 4)
+    config_padding.Parent = config_list
+
+    local function refresh_config_list()
+        for _, child in ipairs(config_list:GetChildren()) do
+            if child:IsA("TextButton") then
+                child:Destroy()
+            end
+        end
+
+        local configs = listfiles("anarchy_configs")
+        for _, file in ipairs(configs) do
+            local file_name = string.match(file, "anarchy_configs/(.+)")
+            if file_name ~= "autoload.txt" then
+                local btn = Instance.new("TextButton")
+                btn.Size = UDim2.new(0, 0, 1, 0)
+                btn.AutoButtonColor = false
+                btn.BackgroundTransparency = 1
+                btn.Text = file_name:gsub(".txt", "")
+                btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+                btn.TextSize = 13
+                btn.Font = Enum.Font.Roboto
+                btn.Parent = config_list
+                btn.Size = UDim2.new(0, btn.TextBounds.X + 10, 1, 0)
+            end
+        end
+    end
+
+    table.insert(connections, save_btn.MouseButton1Click:Connect(function()
+        local config_name = config_name_box.Text
+        if config_name ~= "" then
+            local success, err = pcall(function()
+                if not isfile("anarchy_configs/" .. config_name .. ".txt") then
+                    writefile("anarchy_configs/" .. config_name .. ".txt", "")
+                end
+            end)
+            if success then
+                refresh_config_list()
+            end
+        end
+    end))
+
+    table.insert(connections, load_btn.MouseButton1Click:Connect(function()
+        local config_name = config_name_box.Text
+        if config_name ~= "" and isfile("anarchy_configs/" .. config_name .. ".txt") then
+            local success, err = pcall(function()
+                local data = readfile("anarchy_configs/" .. config_name .. ".txt")
+            end)
+        end
+    end))
+
+    table.insert(connections, overwrite_btn.MouseButton1Click:Connect(function()
+        local config_name = config_name_box.Text
+        if config_name ~= "" then
+            local success, err = pcall(function()
+                writefile("anarchy_configs/" .. config_name .. ".txt", "")
+            end)
+            if success then
+                refresh_config_list()
+            end
+        end
+    end))
+
+    table.insert(connections, delete_btn.MouseButton1Click:Connect(function()
+        local config_name = config_name_box.Text
+        if config_name ~= "" and isfile("anarchy_configs/" .. config_name .. ".txt") then
+            local success, err = pcall(function()
+                delfile("anarchy_configs/" .. config_name .. ".txt")
+            end)
+            if success then
+                refresh_config_list()
+            end
+        end
+    end))
+
+    table.insert(connections, autoload_btn.MouseButton1Click:Connect(function()
+        local config_name = config_name_box.Text
+        if config_name ~= "" and isfile("anarchy_configs/" .. config_name .. ".txt") then
+            local success, err = pcall(function()
+                writefile("anarchy_configs/autoload.txt", config_name)
+            end)
+        end
+    end))
+
+    refresh_config_list()
+end
+
+
     
     local function make_draggable(obj, target)
         target = target or obj
