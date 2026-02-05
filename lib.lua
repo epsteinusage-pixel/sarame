@@ -156,6 +156,7 @@ function library:create()
     mini_stroke.Color = Color3.fromRGB(0, 0, 0)
     mini_stroke.Parent = mini_btn
 
+
     local container_holder = Instance.new("Frame")
     container_holder.Parent = main_inner
     container_holder.BackgroundTransparency = 1
@@ -190,8 +191,88 @@ function library:create()
     local content_container = Instance.new("Frame")
     content_container.Parent = container_holder
     content_container.BackgroundTransparency = 1
-    content_container.Position = UDim2.new(0, 170, 0, 10)
-    content_container.Size = UDim2.new(1, -180, 1, -20)
+    content_container.Position = UDim2.new(0, 170, 0, 50) 
+    content_container.Size = UDim2.new(1, -180, 1, -60)   
+
+    local search_container = Instance.new("Frame")
+    search_container.Name = "Search_Bar"
+    search_container.Size = UDim2.new(1, -180, 0, 30)
+    search_container.Position = UDim2.new(0, 170, 0, 10)
+    search_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    search_container.Parent = container_holder
+
+    local search_corner = Instance.new("UICorner", search_container)
+    search_corner.CornerRadius = UDim.new(0, 6)
+
+    local search_stroke = Instance.new("UIStroke", search_container)
+    search_stroke.Thickness = 0.5
+    search_stroke.Color = Color3.fromRGB(120, 120, 120)
+
+    local search_icon = Instance.new("TextLabel", search_container)
+    search_icon.Size = UDim2.new(0, 30, 1, 0)
+    search_icon.Position = UDim2.new(0, 5, 0, 0)
+    search_icon.BackgroundTransparency = 1
+    search_icon.Text = "🔍"
+    search_icon.TextSize = 14
+    search_icon.TextColor3 = Color3.fromRGB(150, 150, 150)
+    search_icon.Font = Enum.Font.Roboto
+
+    local search_input = Instance.new("TextBox", search_container)
+    search_input.Size = UDim2.new(1, -65, 1, 0)
+    search_input.Position = UDim2.new(0, 35, 0, 0)
+    search_input.BackgroundTransparency = 1
+    search_input.PlaceholderText = "Search features..."
+    search_input.Text = ""
+    search_input.TextColor3 = Color3.fromRGB(200, 200, 200)
+    search_input.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+    search_input.TextSize = 14
+    search_input.Font = Enum.Font.Roboto
+    search_input.TextXAlignment = Enum.TextXAlignment.Left
+
+    local input_stroke = Instance.new("UIStroke", search_input)
+    input_stroke.Thickness = 1
+    input_stroke.Color = Color3.fromRGB(0, 0, 0)
+    input_stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+    input_stroke.Transparency = 0.6
+
+    local clear_btn = Instance.new("TextButton", search_container)
+    clear_btn.Size = UDim2.new(0, 20, 0, 20)
+    clear_btn.Position = UDim2.new(1, -25, 0.5, -10)
+    clear_btn.BackgroundTransparency = 1
+    clear_btn.Text = "×"
+    clear_btn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    clear_btn.TextSize = 18
+    clear_btn.Visible = false
+
+    table.insert(connections, clear_btn.MouseButton1Click:Connect(function()
+        search_input.Text = ""
+    end))
+
+    table.insert(connections, search_input:GetPropertyChangedSignal("Text"):Connect(function()
+        local query = search_input.Text:lower()
+        clear_btn.Visible = (query ~= "")
+        
+        if query ~= "" then
+            input_stroke.Thickness = 1.5
+            input_stroke.Transparency = 0
+        else
+            input_stroke.Thickness = 1
+            input_stroke.Transparency = 0.6
+        end
+        
+        for _, page in pairs(content_container:GetChildren()) do
+            if page:IsA("ScrollingFrame") then
+                for _, element in pairs(page:GetChildren()) do
+                    if element:IsA("Frame") then
+                        local label = element:FindFirstChildWhichIsA("TextLabel")
+                        if label then
+                            element.Visible = label.Text:lower():find(query) ~= nil
+                        end
+                    end
+                end
+            end
+        end
+    end))
 
     local window = {}
     window.tabs = {}
@@ -219,7 +300,8 @@ function library:create()
         page.Visible = false
         page.ScrollBarThickness = 1
         page.BorderSizePixel = 0
-        page.CanvasSize = UDim2.new(0, 0, 2, 0)
+        page.CanvasSize = UDim2.new(0, 0, 0, 0)
+        page.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
         table.insert(connections, tab_button.MouseButton1Click:Connect(function()
             for _, btn in pairs(tab_container:GetChildren()) do
@@ -244,6 +326,7 @@ function library:create()
             layout.Padding = UDim.new(0, 8)
             layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
             layout.VerticalAlignment = Enum.VerticalAlignment.Top
+            layout.SortOrder = Enum.SortOrder.LayoutOrder
 
             local container_padding = page:FindFirstChild("UIPadding") or Instance.new("UIPadding", page)
             container_padding.PaddingTop = UDim.new(0, 15)
@@ -588,10 +671,19 @@ function library:create()
             table.insert(connections, trigger.MouseButton1Click:Connect(function()
                 expanded = not expanded
                 local target_size = expanded and UDim2.new(1, -15, 0, 135) or UDim2.new(1, -15, 0, 38)
+                
                 tween_service:Create(dropdown_container, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = target_size}):Play()
+                
                 if not expanded then
-                    option_holder.CanvasPosition = Vector2.new(0, 0)
+                    option_holder.Visible = false
+                else
+                    task.delay(0.1, function()
+                        option_holder.Visible = true
+                    end)
                 end
+                
+                task.wait(0.3)
+                page.CanvasPosition = page.CanvasPosition
                 arrow.Text = expanded and "▲" or "▼"
             end))
 
@@ -624,11 +716,12 @@ function library:create()
                             opt_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
                         end
                         local display_text = #selected_options > 0 and table.concat(selected_options, ", ") or "None"
-                        label.Text = name .. ": " .. display_text .. ""
+                        label.Text = name .. ": " .. display_text
                         callback(selected_options)
                     else
-                        label.Text = name .. ": " .. option .. ""
+                        label.Text = name .. ": " .. option
                         expanded = false
+                        option_holder.Visible = false
                         tween_service:Create(dropdown_container, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(1, -15, 0, 38)}):Play()
                         option_holder.CanvasPosition = Vector2.new(0, 0)
                         arrow.Text = "▼"
@@ -637,6 +730,8 @@ function library:create()
                 end))
             end
 
+            option_holder.Visible = false
+            dropdown_container.ClipsDescendants = true
             dropdown_container.Parent = page
         end
 
@@ -1086,6 +1181,44 @@ function library:create()
                     callback()
                 end
             end))
+        end
+
+        function tab:add_section(text)
+            local section_container = Instance.new("Frame")
+            section_container.Name = text .. "_Section"
+            section_container.Size = UDim2.new(1, -15, 0, 30)
+            section_container.BackgroundTransparency = 1
+            section_container.LayoutOrder = #page:GetChildren()
+            section_container.Parent = page
+
+            local section_label = Instance.new("TextLabel")
+            section_label.Size = UDim2.new(1, 0, 1, 0)
+            section_label.BackgroundTransparency = 1
+            section_label.Text = text
+            section_label.TextColor3 = Color3.fromRGB(220, 220, 220)
+            section_label.TextSize = 16
+            section_label.Font = Enum.Font.Roboto
+            section_label.TextXAlignment = Enum.TextXAlignment.Left
+            section_label.Parent = section_container
+
+            local section_stroke = Instance.new("UIStroke")
+            section_stroke.Thickness = 1.5
+            section_stroke.Color = Color3.fromRGB(0, 0, 0)
+            section_stroke.Parent = section_label
+
+            local line = Instance.new("Frame")
+            line.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            line.BorderSizePixel = 0
+            line.Parent = section_container
+
+            local function update_line()
+                local text_width = section_label.TextBounds.X
+                line.Size = UDim2.new(1, -(text_width + 20), 0, 1)
+                line.Position = UDim2.new(0, text_width + 10, 0.5, 0)
+            end
+
+            section_label:GetPropertyChangedSignal("TextBounds"):Connect(update_line)
+            update_line()
         end
 
         table.insert(window.tabs, tab)
