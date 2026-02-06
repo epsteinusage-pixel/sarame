@@ -568,6 +568,16 @@ function library:create()
 
             local enabled = false
 
+            local toggle_logic = {}
+
+            function toggle_logic:set(val)
+                enabled = val
+                local target_pos = enabled and UDim2.new(1, -20, 0.5, 0) or UDim2.new(0, 2, 0.5, 0)
+                tween_service:Create(circle, TweenInfo.new(0.2), {Position = target_pos}):Play()
+                callback(enabled)
+            end
+
+
             local function toggle()
                 enabled = not enabled
                 local knob_pos = enabled and UDim2.new(1, -16, 0.5, -6) or UDim2.new(0, 4, 0.5, -6)
@@ -596,6 +606,14 @@ function library:create()
                     toggle()
                 end
             end))
+
+            return {
+                set = function(self, val)
+                    if enabled ~= val then
+                        toggle()
+                    end
+                end
+            }
         end
 
         function tab:add_slider(name, min, max, default, callback)
@@ -689,6 +707,18 @@ function library:create()
             knob_stroke.Parent = knob
 
             local dragging = false
+            local slider_logic = {}
+
+
+            function slider_logic:set(val)
+                local percent = (math.clamp(val, min, max) - min) / (max - min)
+                value_label.Text = tostring(val)
+                knob.Position = UDim2.new(percent, -5, 0.5, -5)
+                slider_fill.Size = UDim2.new(percent, 0, 1, 0)
+                callback(val)
+            end
+
+
 
             local function move()
                 local input_pos = user_input_service:GetMouseLocation().X
@@ -704,27 +734,28 @@ function library:create()
                 callback(value)
             end
 
-        table.insert(connections, knob.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
-                tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
-            end
-        end))
+            table.insert(connections, knob.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
+                    tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
+                end
+            end))
 
-        table.insert(connections, user_input_service.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = false
-                tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
-                tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
-            end
-        end))
+            table.insert(connections, user_input_service.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = false
+                    tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
+                    tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
+                end
+            end))
 
-        table.insert(connections, user_input_service.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                move()
-            end
-        end))
+            table.insert(connections, user_input_service.InputChanged:Connect(function(input)
+                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    move()
+                end
+            end))
+            return slider_logic
 
         end
 
@@ -800,6 +831,30 @@ function library:create()
             local expanded = false
             local selected_options = {}
 
+            local dropdown_logic = {}
+
+            function dropdown_logic:set(val)
+                if is_multi then
+                    selected_options = type(val) == "table" and val or {val}
+                    for _, opt_btn in pairs(option_holder:GetChildren()) do
+                        if opt_btn:IsA("TextButton") then
+                            opt_btn.TextColor3 = table.find(selected_options, opt_btn.Text) and Color3.fromRGB(106, 152, 242) or Color3.fromRGB(180, 180, 180)
+                        end
+                    end
+                    local display_text = #selected_options > 0 and table.concat(selected_options, ", ") or "None"
+                    label.Text = name .. ": " .. display_text
+                else
+                    label.Text = name .. ": " .. tostring(val)
+                    for _, opt_btn in pairs(option_holder:GetChildren()) do
+                        if opt_btn:IsA("TextButton") and opt_btn.Text == val then
+                            opt_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
+                        end
+                    end
+                end
+            end
+
+
+
             table.insert(connections, trigger.MouseButton1Click:Connect(function()
                 expanded = not expanded
                 local target_size = expanded and UDim2.new(1, -15, 0, 135) or UDim2.new(1, -15, 0, 38)
@@ -865,6 +920,9 @@ function library:create()
             option_holder.Visible = false
             dropdown_container.ClipsDescendants = true
             dropdown_container.Parent = page
+
+            return dropdown_logic
+
         end
 
         function tab:add_color_picker(name, default_color, callback)
@@ -1077,6 +1135,28 @@ function library:create()
                 local target_y = is_expanded and 38 or 150
                 tween_service:Create(picker_container, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(1, -15, 0, target_y)}):Play()
             end))
+
+            return {
+                set = function(self, color, transparency)
+                    if color then
+                        local h, s, v = color:ToHSV()
+                        current_h = h
+                        current_s = s
+                        current_v = v
+                        current_t = transparency or 0
+                        
+                        hue_knob.Position = UDim2.new(current_h, 0, 0.5, 0)
+                        trans_knob.Position = UDim2.new(current_t, 0, 0.5, 0)
+                        picker_knob.Position = UDim2.new(current_s, 0, 1 - current_v, 0)
+                        
+                        local picked = Color3.fromHSV(current_h, current_s, current_v)
+                        picker_square.BackgroundColor3 = Color3.fromHSV(current_h, 1, 1)
+                        color_display.BackgroundColor3 = picked
+                        color_display.BackgroundTransparency = current_t
+                        callback(picked, current_t)
+                    end
+                end
+            }
         end
 
         function tab:add_button(name, callback)
@@ -1149,6 +1229,7 @@ function library:create()
             input_container.Name = name .. "_Input"
             input_container.Size = UDim2.new(1, -15, 0, 60)
             input_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            input_container.BorderSizePixel = 0
             input_container.Parent = page
             input_container.LayoutOrder = #page:GetChildren()
 
@@ -1172,16 +1253,23 @@ function library:create()
             label.TextXAlignment = Enum.TextXAlignment.Left
             label.Parent = input_container
 
+            local label_stroke = Instance.new("UIStroke")
+            label_stroke.Thickness = 1.5
+            label_stroke.Color = Color3.fromRGB(0, 0, 0)
+            label_stroke.Parent = label
+
             local text_box = Instance.new("TextBox")
             text_box.Size = UDim2.new(1, -24, 0, 26)
             text_box.Position = UDim2.new(0, 12, 0, 28)
             text_box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
             text_box.Text = ""
             text_box.PlaceholderText = placeholder or "Enter text..."
+            text_box.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
             text_box.TextColor3 = Color3.fromRGB(200, 200, 200)
             text_box.TextSize = 13
             text_box.Font = Enum.Font.Roboto
-            text_box.TextXAlignment = Enum.TextXAlignment.Left
+            text_box.TextXAlignment = Enum.TextXAlignment.Center
+            text_box.ClearTextOnFocus = false
             text_box.Parent = input_container
 
             local textbox_corner = Instance.new("UICorner")
@@ -1189,7 +1277,7 @@ function library:create()
             textbox_corner.Parent = text_box
 
             local textbox_stroke = Instance.new("UIStroke")
-            textbox_stroke.Thickness = 1.2
+            textbox_stroke.Thickness = 1
             textbox_stroke.Color = Color3.fromRGB(0, 0, 0)
             textbox_stroke.Parent = text_box
 
