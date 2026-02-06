@@ -6,8 +6,10 @@ local run_service = game:GetService("RunService")
 local library = {}
 local current_tab_page = nil
 
+
 function library:create()
     local connections = {}
+    local keybind_registry = {}
     
     local screen_gui = Instance.new("ScreenGui")
     screen_gui.Name = "anarchy_gui"
@@ -84,8 +86,8 @@ function library:create()
     toggle_btn.Size = UDim2.new(1, 0, 1, 0)
     toggle_btn.BackgroundTransparency = 1
     toggle_btn.RichText = true
-    toggle_btn.Text = 'Anarchy'
-    toggle_btn.TextSize = 22
+    toggle_btn.Text = 'Toggle GUI'
+    toggle_btn.TextSize = 19
     toggle_btn.Font = Enum.Font.Roboto
     toggle_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
     toggle_btn.Parent = toggle_inner
@@ -156,7 +158,7 @@ function library:create()
     mini_stroke.Thickness = 1.2
     mini_stroke.Color = Color3.fromRGB(0, 0, 0)
     mini_stroke.Parent = mini_btn
-
+    
 
     local container_holder = Instance.new("Frame")
     container_holder.Parent = main_inner
@@ -274,6 +276,123 @@ function library:create()
         end
     end))
 
+    local keybind_list_outer, keybind_list_inner
+    local keybind_list_content
+    local keybind_list_visible = false
+
+    local function create_keybind_list()
+        keybind_list_outer, keybind_list_inner = create_sandwich("keybind_list", UDim2.new(0, 250, 0, 300), UDim2.new(0, 20, 0, 80), screen_gui)
+        keybind_list_inner.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        keybind_list_outer.Visible = false
+
+        local title = Instance.new("TextLabel")
+        title.Size = UDim2.new(1, -20, 0, 25)
+        title.Position = UDim2.new(0, 10, 0, 5)
+        title.BackgroundTransparency = 1
+        title.Text = "Anarchy Keybinds"
+        title.TextColor3 = Color3.fromRGB(106, 152, 242)
+        title.TextSize = 16
+        title.Font = Enum.Font.Roboto
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        title.Parent = keybind_list_inner
+
+        local title_stroke = Instance.new("UIStroke")
+        title_stroke.Thickness = 1.5
+        title_stroke.Color = Color3.fromRGB(0, 0, 0)
+        title_stroke.Parent = title
+
+        local separator = Instance.new("Frame")
+        separator.Size = UDim2.new(1, -20, 0, 1)
+        separator.Position = UDim2.new(0, 10, 0, 35)
+        separator.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        separator.BorderSizePixel = 0
+        separator.Parent = keybind_list_inner
+
+        keybind_list_content = Instance.new("ScrollingFrame")
+        keybind_list_content.Size = UDim2.new(1, -20, 1, -45)
+        keybind_list_content.Position = UDim2.new(0, 10, 0, 40)
+        keybind_list_content.BackgroundTransparency = 1
+        keybind_list_content.ScrollBarThickness = 2
+        keybind_list_content.ScrollBarImageColor3 = Color3.fromRGB(106, 152, 242)
+        keybind_list_content.BorderSizePixel = 0
+        keybind_list_content.CanvasSize = UDim2.new(0, 0, 0, 0)
+        keybind_list_content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        keybind_list_content.Parent = keybind_list_inner
+
+        local layout = Instance.new("UIListLayout")
+        layout.Padding = UDim.new(0, 5)
+        layout.Parent = keybind_list_content
+
+        local function make_draggable(obj, target)
+            target = target or obj
+            local dragging, drag_start, start_pos
+
+            table.insert(connections, obj.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    drag_start = input.Position
+                    start_pos = target.Position
+
+                    input.Changed:Connect(function()
+                        if input.UserInputState == Enum.UserInputState.End then
+                            dragging = false
+                        end
+                    end)
+                end
+            end))
+
+            table.insert(connections, user_input_service.InputChanged:Connect(function(input)
+                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    local delta = input.Position - drag_start
+                    target.Position = UDim2.new(start_pos.X.Scale, start_pos.X.Offset + delta.X, start_pos.Y.Scale, start_pos.Y.Offset + delta.Y)
+                end
+            end))
+        end
+
+        make_draggable(keybind_list_inner, keybind_list_outer)
+    end
+
+    local function update_keybind_list()
+        if not keybind_list_content then return end
+        
+        keybind_list_content:ClearAllChildren()
+        
+        local layout = Instance.new("UIListLayout")
+        layout.Padding = UDim.new(0, 5)
+        layout.Parent = keybind_list_content
+
+        local count = 0
+        for name, data in pairs(keybind_registry) do
+            if name ~= "Menu Bind" then
+                count = count + 1
+                local item = Instance.new("Frame")
+                item.Size = UDim2.new(1, 0, 0, 25)
+                item.BackgroundTransparency = 1
+                item.Parent = keybind_list_content
+
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, 0, 1, 0)
+                label.BackgroundTransparency = 1
+                label.Text = string.format(name, data.key and data.key.Name or "None")
+                label.TextColor3 = data.enabled and Color3.fromRGB(106, 152, 242) or Color3.fromRGB(220, 220, 220)
+                label.TextSize = 14
+                label.Font = Enum.Font.Roboto
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Parent = item
+
+                local label_stroke = Instance.new("UIStroke")
+                label_stroke.Thickness = 1.5
+                label_stroke.Color = Color3.fromRGB(0, 0, 0)
+                label_stroke.Parent = label
+
+                data.label = label
+            end
+        end
+
+        local new_height = 45 + (count * 30)
+        keybind_list_outer.Size = UDim2.new(0, 250, 0, new_height)
+    end
+
     local window = {}
     window.tabs = {}
 
@@ -370,6 +489,8 @@ function library:create()
             local binding = false
 
             if has_bind then
+                keybind_registry[name] = {key = nil, enabled = false}
+
                 local keybind_btn = Instance.new("TextButton")
                 keybind_btn.Size = UDim2.new(0, 50, 0, 22)
                 keybind_btn.Position = UDim2.new(1, -105, 0.5, -11)
@@ -400,12 +521,15 @@ function library:create()
                         if input.KeyCode == Enum.KeyCode.Escape then
                             current_bind = nil
                             keybind_btn.Text = "None"
+                            keybind_registry[name].key = nil
                         else
                             current_bind = input.KeyCode
                             keybind_btn.Text = input.KeyCode.Name
+                            keybind_registry[name].key = input.KeyCode
                         end
                         keybind_btn.TextColor3 = Color3.fromRGB(180, 180, 180)
                         binding = false
+                        update_keybind_list()
                     end
                 end))
             end
@@ -456,6 +580,11 @@ function library:create()
                 tween_service:Create(switch_bg, TweenInfo.new(0.2), {BackgroundColor3 = target_bg}):Play()
                 tween_service:Create(bg_accent_stroke, TweenInfo.new(0.2), {Color = target_accent}):Play()
                 tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = target_text}):Play()
+
+                if keybind_registry[name] then
+                    keybind_registry[name].enabled = enabled
+                    update_keybind_list()
+                end
 
                 callback(enabled)
             end
@@ -596,7 +725,7 @@ function library:create()
                 move()
             end
         end))
-        
+
         end
 
         function tab:add_dropdown(name, options, is_multi, callback)
@@ -1144,6 +1273,8 @@ function library:create()
             local current_bind = default_key
             local binding = false
 
+            keybind_registry[name] = {key = default_key, enabled = false}
+
             local keybind_btn = Instance.new("TextButton")
             keybind_btn.Size = UDim2.new(0, 50, 0, 22)
             keybind_btn.Position = UDim2.new(1, -60, 0.5, -11)
@@ -1174,16 +1305,123 @@ function library:create()
                     if input.KeyCode == Enum.KeyCode.Escape then
                         current_bind = nil
                         keybind_btn.Text = "None"
+                        keybind_registry[name].key = nil
                     else
                         current_bind = input.KeyCode
                         keybind_btn.Text = input.KeyCode.Name
+                        keybind_registry[name].key = input.KeyCode
                     end
                     keybind_btn.TextColor3 = Color3.fromRGB(180, 180, 180)
                     binding = false
+                    update_keybind_list()
                 elseif not binding and current_bind and input.KeyCode == current_bind and not user_input_service:GetFocusedTextBox() then
                     callback()
                 end
             end))
+        end
+
+        function tab:add_keybind_list(name)
+            if not keybind_list_outer then
+                create_keybind_list()
+            end
+
+            local layout = page:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", page)
+            layout.Padding = UDim.new(0, 8)
+            layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+            layout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+            local container_padding = page:FindFirstChild("UIPadding") or Instance.new("UIPadding", page)
+            container_padding.PaddingTop = UDim.new(0, 15)
+
+            local toggle_container = Instance.new("Frame")
+            toggle_container.Name = name .. "_Toggle"
+            toggle_container.Size = UDim2.new(1, -15, 0, 38)
+            toggle_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            toggle_container.BorderSizePixel = 0
+            toggle_container.Parent = page
+            toggle_container.LayoutOrder = #page:GetChildren()
+
+            local container_corner = Instance.new("UICorner")
+            container_corner.CornerRadius = UDim.new(0, 6)
+            container_corner.Parent = toggle_container
+
+            local container_stroke = Instance.new("UIStroke")
+            container_stroke.Thickness = 0.5
+            container_stroke.Color = Color3.fromRGB(120, 120, 120)
+            container_stroke.Parent = toggle_container
+
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, -60, 1, 0)
+            label.Position = UDim2.new(0, 12, 0, 0)
+            label.BackgroundTransparency = 1
+            label.Text = name
+            label.TextColor3 = Color3.fromRGB(220, 220, 220)
+            label.TextSize = 14
+            label.Font = Enum.Font.Roboto
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.Parent = toggle_container
+
+            local label_stroke = Instance.new("UIStroke")
+            label_stroke.Thickness = 1.5
+            label_stroke.Color = Color3.fromRGB(0, 0, 0)
+            label_stroke.Parent = label
+
+            local switch_bg = Instance.new("TextButton")
+            switch_bg.Size = UDim2.new(0, 38, 0, 20)
+            switch_bg.Position = UDim2.new(1, -48, 0.5, -10)
+            switch_bg.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+            switch_bg.Text = ""
+            switch_bg.AutoButtonColor = false
+            switch_bg.Parent = toggle_container
+
+            local bg_corner = Instance.new("UICorner")
+            bg_corner.CornerRadius = UDim.new(1, 0)
+            bg_corner.Parent = switch_bg
+
+            local bg_accent_stroke = Instance.new("UIStroke")
+            bg_accent_stroke.Thickness = 1.1
+            bg_accent_stroke.Color = Color3.fromRGB(100, 100, 100)
+            bg_accent_stroke.Parent = switch_bg
+
+            local knob = Instance.new("Frame")
+            knob.Size = UDim2.new(0, 12, 0, 12)
+            knob.Position = UDim2.new(0, 4, 0.5, -6)
+            knob.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+            knob.Parent = switch_bg
+
+            local knob_corner = Instance.new("UICorner")
+            knob_corner.CornerRadius = UDim.new(1, 0)
+            knob_corner.Parent = knob
+
+            local knob_stroke = Instance.new("UIStroke")
+            knob_stroke.Thickness = 1.5
+            knob_stroke.Color = Color3.fromRGB(0, 0, 0)
+            knob_stroke.Parent = knob
+
+            local enabled = false
+
+            local function toggle()
+                enabled = not enabled
+                keybind_list_visible = enabled
+                keybind_list_outer.Visible = enabled
+
+                local knob_pos = enabled and UDim2.new(1, -16, 0.5, -6) or UDim2.new(0, 4, 0.5, -6)
+                local target_accent = enabled and Color3.fromRGB(106, 152, 242) or Color3.fromRGB(100, 100, 100)
+                local target_text = enabled and Color3.fromRGB(106, 152, 242) or Color3.fromRGB(220, 220, 220)
+                local target_bg = enabled and Color3.fromRGB(106, 152, 242) or Color3.fromRGB(55, 55, 55)
+                local target_knob = enabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 200, 200)
+
+                tween_service:Create(knob, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {Position = knob_pos, BackgroundColor3 = target_knob}):Play()
+                tween_service:Create(switch_bg, TweenInfo.new(0.2), {BackgroundColor3 = target_bg}):Play()
+                tween_service:Create(bg_accent_stroke, TweenInfo.new(0.2), {Color = target_accent}):Play()
+                tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = target_text}):Play()
+
+                if enabled then
+                    update_keybind_list()
+                end
+            end
+
+            table.insert(connections, switch_bg.MouseButton1Click:Connect(toggle))
         end
 
         function tab:add_section(text)
