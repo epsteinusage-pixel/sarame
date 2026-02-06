@@ -601,7 +601,6 @@ function library:create()
                 move()
             end
         end))
-
         end
 
         function tab:add_dropdown(name, options, is_multi, callback)
