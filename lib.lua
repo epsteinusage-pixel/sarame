@@ -4,6 +4,7 @@ local players = game:GetService("Players")
 local run_service = game:GetService("RunService")
 
 local library = {}
+local current_tab_page = nil
 
 function library:create()
     local connections = {}
@@ -15,7 +16,7 @@ function library:create()
 
     local function create_sandwich(name, size, pos, parent)
         local black_ext_frame = Instance.new("Frame")
-        black_ext_frame.Name = name .. "_black_ext"
+        black_ext_frame.Name = nam  e .. "_black_ext"
         black_ext_frame.Size = size
         black_ext_frame.Position = pos
         black_ext_frame.BackgroundTransparency = 1
@@ -250,23 +251,22 @@ function library:create()
 
     table.insert(connections, search_input:GetPropertyChangedSignal("Text"):Connect(function()
         local query = search_input.Text:lower()
+        
         clear_btn.Visible = (query ~= "")
-        
-        if query ~= "" then
-            input_stroke.Thickness = 1.5
-            input_stroke.Transparency = 0
-        else
-            input_stroke.Thickness = 1
-            input_stroke.Transparency = 0.6
-        end
-        
+        input_stroke.Thickness = (query ~= "") and 1.5 or 1
+        input_stroke.Transparency = (query ~= "") and 0 or 0.6
+
         for _, page in pairs(content_container:GetChildren()) do
             if page:IsA("ScrollingFrame") then
                 for _, element in pairs(page:GetChildren()) do
                     if element:IsA("Frame") then
                         local label = element:FindFirstChildWhichIsA("TextLabel")
                         if label then
-                            element.Visible = label.Text:lower():find(query) ~= nil
+                            if query == "" then
+                                element.Visible = true
+                            else
+                                element.Visible = label.Text:lower():find(query) ~= nil
+                            end
                         end
                     end
                 end
@@ -315,8 +315,15 @@ function library:create()
                 end
             end
             page.Visible = true
+            current_tab_page = page
             tween_service:Create(tab_button, TweenInfo.new(0.3, Enum.EasingStyle.Sine), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
         end))
+
+        if #tab_container:GetChildren() == 2 then 
+            page.Visible = true
+            current_tab_page = page
+            tab_button.TextColor3 = Color3.fromRGB(106, 152, 242)
+        end
 
         local tab = {}
         tab.page = page
@@ -573,27 +580,28 @@ function library:create()
                 callback(value)
             end
 
-            table.insert(connections, knob.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = true
-                    tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
-                    tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
-                end
-            end))
+        table.insert(connections, knob.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
+                tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
+            end
+        end))
 
-            table.insert(connections, user_input_service.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = false
-                    tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
-                    tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
-                end
-            end))
+        table.insert(connections, user_input_service.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+                tween_service:Create(value_label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
+                tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
+            end
+        end))
 
-            table.insert(connections, user_input_service.InputChanged:Connect(function(input)
-                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                    move()
-                end
-            end))
+        table.insert(connections, user_input_service.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                move()
+            end
+        end))
+
         end
 
         function tab:add_dropdown(name, options, is_multi, callback)
