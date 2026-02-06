@@ -373,7 +373,7 @@ function library:create()
                 local label = Instance.new("TextLabel")
                 label.Size = UDim2.new(1, 0, 1, 0)
                 label.BackgroundTransparency = 1
-                label.Text = string.format(name, data.key and data.key.Name or "None")
+                label.Text = string.format("%s  -  %s", name, data.key and data.key.Name or "None")
                 label.TextColor3 = data.enabled and Color3.fromRGB(106, 152, 242) or Color3.fromRGB(220, 220, 220)
                 label.TextSize = 14
                 label.Font = Enum.Font.Roboto
