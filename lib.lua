@@ -852,6 +852,61 @@ function library:create()
                     end
                 end
             end
+            
+            function dropdown_logic:refresh(new_options)
+                option_holder:ClearAllChildren()
+                
+                local layout = Instance.new("UIListLayout")
+                layout.Padding = UDim.new(0, 3)
+                layout.Parent = option_holder
+                
+                selected_options = {}
+                
+                for _, option in ipairs(new_options) do
+                    local opt_btn = Instance.new("TextButton")
+                    opt_btn.Size = UDim2.new(1, 0, 0, 25)
+                    opt_btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                    opt_btn.Font = Enum.Font.Roboto
+                    opt_btn.Text = option
+                    opt_btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+                    opt_btn.TextSize = 13
+                    opt_btn.Parent = option_holder
+
+                    local btn_corner = Instance.new("UICorner")
+                    btn_corner.CornerRadius = UDim.new(0, 4)
+                    btn_corner.Parent = opt_btn
+
+                    local opt_stroke = Instance.new("UIStroke")
+                    opt_stroke.Thickness = 1
+                    opt_stroke.Color = Color3.fromRGB(0, 0, 0)
+                    opt_stroke.Parent = opt_btn
+
+                    table.insert(connections, opt_btn.MouseButton1Click:Connect(function()
+                        if is_multi then
+                            if table.find(selected_options, option) then
+                                table.remove(selected_options, table.find(selected_options, option))
+                                opt_btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+                            else
+                                table.insert(selected_options, option)
+                                opt_btn.TextColor3 = Color3.fromRGB(106, 152, 242)
+                            end
+                            local display_text = #selected_options > 0 and table.concat(selected_options, ", ") or "None"
+                            label.Text = name .. ": " .. display_text
+                            callback(selected_options)
+                        else
+                            label.Text = name .. ": " .. option
+                            expanded = false
+                            option_holder.Visible = false
+                            tween_service:Create(dropdown_container, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(1, -15, 0, 38)}):Play()
+                            option_holder.CanvasPosition = Vector2.new(0, 0)
+                            arrow.Text = "▼"
+                            callback(option)
+                        end
+                    end))
+                end
+                
+                label.Text = name .. ": None"
+            end
 
 
 
