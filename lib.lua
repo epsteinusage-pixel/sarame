@@ -1145,14 +1145,10 @@ function library:create()
             layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
             layout.VerticalAlignment = Enum.VerticalAlignment.Top
 
-            local container_padding = page:FindFirstChild("UIPadding") or Instance.new("UIPadding", page)
-            container_padding.PaddingTop = UDim.new(0, 15)
-
             local input_container = Instance.new("Frame")
             input_container.Name = name .. "_Input"
             input_container.Size = UDim2.new(1, -15, 0, 60)
             input_container.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            input_container.BorderSizePixel = 0
             input_container.Parent = page
             input_container.LayoutOrder = #page:GetChildren()
 
@@ -1176,23 +1172,16 @@ function library:create()
             label.TextXAlignment = Enum.TextXAlignment.Left
             label.Parent = input_container
 
-            local label_stroke = Instance.new("UIStroke")
-            label_stroke.Thickness = 1.5
-            label_stroke.Color = Color3.fromRGB(0, 0, 0)
-            label_stroke.Parent = label
-
             local text_box = Instance.new("TextBox")
             text_box.Size = UDim2.new(1, -24, 0, 26)
             text_box.Position = UDim2.new(0, 12, 0, 28)
             text_box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
             text_box.Text = ""
             text_box.PlaceholderText = placeholder or "Enter text..."
-            text_box.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
             text_box.TextColor3 = Color3.fromRGB(200, 200, 200)
             text_box.TextSize = 13
             text_box.Font = Enum.Font.Roboto
             text_box.TextXAlignment = Enum.TextXAlignment.Left
-            text_box.ClearTextOnFocus = false
             text_box.Parent = input_container
 
             local textbox_corner = Instance.new("UICorner")
@@ -1200,30 +1189,11 @@ function library:create()
             textbox_corner.Parent = text_box
 
             local textbox_stroke = Instance.new("UIStroke")
-            textbox_stroke.Thickness = 1
+            textbox_stroke.Thickness = 1.2
             textbox_stroke.Color = Color3.fromRGB(0, 0, 0)
             textbox_stroke.Parent = text_box
 
-            local textbox_padding = Instance.new("UIPadding")
-            textbox_padding.PaddingLeft = UDim.new(0, 8)
-            textbox_padding.PaddingRight = UDim.new(0, 8)
-            textbox_padding.Parent = text_box
-
-            table.insert(connections, text_box.Focused:Connect(function()
-                tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(0, 0, 0)}):Play()
-                tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
-            end))
-
-            table.insert(connections, text_box.FocusLost:Connect(function(enter_pressed)
-                tween_service:Create(textbox_stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(0, 0, 0)}):Play()
-                tween_service:Create(label, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
-                
-                if enter_pressed then
-                    callback(text_box.Text)
-                end
-            end))
-
-            table.insert(connections, text_box:GetPropertyChangedSignal("Text"):Connect(function()
+            table.insert(connections, text_box.FocusLost:Connect(function()
                 callback(text_box.Text)
             end))
         end
