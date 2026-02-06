@@ -16,7 +16,7 @@ function library:create()
 
     local function create_sandwich(name, size, pos, parent)
         local black_ext_frame = Instance.new("Frame")
-        black_ext_frame.Name = nam  e .. "_black_ext"
+        black_ext_frame.Name = name .. "_black_ext"
         black_ext_frame.Size = size
         black_ext_frame.Position = pos
         black_ext_frame.BackgroundTransparency = 1
@@ -319,11 +319,6 @@ function library:create()
             tween_service:Create(tab_button, TweenInfo.new(0.3, Enum.EasingStyle.Sine), {TextColor3 = Color3.fromRGB(106, 152, 242)}):Play()
         end))
 
-        if #tab_container:GetChildren() == 2 then 
-            page.Visible = true
-            current_tab_page = page
-            tab_button.TextColor3 = Color3.fromRGB(106, 152, 242)
-        end
 
         local tab = {}
         tab.page = page
@@ -601,6 +596,7 @@ function library:create()
                 move()
             end
         end))
+        
         end
 
         function tab:add_dropdown(name, options, is_multi, callback)
