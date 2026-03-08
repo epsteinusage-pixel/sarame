@@ -22,7 +22,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-TOKEN = 'MTQ3OTk4ODI0NzI5NDY0MDI1OQ.GkaNKy.mJqt6X9vJSY50NP6PNLTR5IK3dqWs1c0uJYkIc'
+TOKEN = 'PASTE_YOUR_NEW_RESET_TOKEN_HERE'
 CHAN_ID = 1479671475643617280
 
 @bot.event
